@@ -1,0 +1,81 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <Ethernet>
+                        <name>{$INTF_NAME}</name>
+                        <?if {$DESCRIPTION != ""}?>
+                        <description>{$DESCRIPTION}</description>
+                        <?end?>
+                        <?if {$MODE = "access"}?>
+                        <switchport>
+                            <mode>access</mode>
+                            <access>
+                                <vlan>{$VLAN}</vlan>
+                            </access>
+                        </switchport>
+                        <spanning-tree>
+                            <port>
+                                <type>edge</type>
+                            </port>
+                        </spanning-tree>
+                        <?if {$SPEED != ""}?>
+                        <speed>{$SPEED}</speed>
+                        <?end?>
+                        <?else?>
+                        <!-- This is an edge interface. -->
+                        <enable>
+                            <switchport>false</switchport>
+                        </enable>
+                        <ip>
+                            <address>
+                                <ipaddr>{$V4_ADDRESS}/31</ipaddr>
+                            </address>
+                            <ospf>
+                                <authentication>
+                                    <authentication-type>message-digest</authentication-type>
+                                    <key-chain>OSPF_KEY</key-chain>
+                                </authentication>
+                                <network>point-to-point</network>
+                            </ospf>
+                            <router>
+                                <ospf>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospf>
+                            </router>
+                            <?if {$USE_PIM = "True"}?>
+                            <pim>
+                                <sparse-mode/>
+                            </pim>
+                            <?end?>
+                        </ip>
+                        <ipv6>
+                            <?if {$V6_ADDRESS = ""}?>
+                            <address>
+                                <use-link-local-only/>
+                            </address>
+                            <?else?>
+                            <address>
+                                <addresses>
+                                    <addr>{$V6_ADDRESS}/127</addr>
+                                </addresses>
+                            </address>
+                            <?end?>
+                            <router>
+                                <ospfv3>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospfv3>
+                            </router>
+                        </ipv6>
+                        <mtu>9000</mtu>
+                        <?end?>
+                    </Ethernet>
+                </interface>
+            </config>
+        </device>
+    </devices>
+</config-template>

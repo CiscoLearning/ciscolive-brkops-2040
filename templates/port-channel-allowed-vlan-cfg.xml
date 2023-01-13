@@ -1,0 +1,23 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <port-channel>
+                        <name>{$PC_NAME}</name>
+                        <switchport>
+                            <trunk>
+                                <allowed>
+                                    <vlan>
+                                        <ids>{$ALLOWED_VLAN}</ids>
+                                    </vlan>
+                                </allowed>
+                            </trunk>
+                        </switchport>
+                    </port-channel>
+                </interface>
+            </config>
+        </device>
+    </devices>
+</config-template>

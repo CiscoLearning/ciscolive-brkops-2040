@@ -1,0 +1,31 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <Ethernet>
+                        <name>{$MEMBER_INTF}</name>
+                        <shutdown tags="delete"/>
+                        <description>-> {$VPC_PEER_SW}_e{$MEMBER_INTF}</description>
+                        <enable>
+                            <switchport>true</switchport>
+                        </enable>
+                        <switchport>
+                            <mode>trunk</mode>
+                        </switchport>
+                        <channel-group>
+                            <id>{$VPC_PORT_CHANNEL}</id>
+                            <mode>active</mode>
+                        </channel-group>
+                        <spanning-tree>
+                            <port>
+                                <type>network</type>
+                            </port>
+                        </spanning-tree>
+                    </Ethernet>
+                </interface>
+            </config>
+        </device>
+    </devices>
+</config-template>

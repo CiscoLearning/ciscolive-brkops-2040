@@ -1,0 +1,27 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <Vlan>
+                        <name>{$VLAN_ID}</name>
+                        <ipv6>
+                            <nd>
+                                <ra>
+                                    <dns>
+                                        <search-list>
+                                            <name>{$DOMAIN}</name>
+                                            <life-time>86400</life-time>
+                                            <sequence>0</sequence>
+                                        </search-list>
+                                    </dns>
+                                </ra>
+                            </nd>
+                        </ipv6>
+                    </Vlan>
+                </interface>
+            </config>
+        </device>
+    </devices>
+</config-template>

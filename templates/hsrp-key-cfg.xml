@@ -1,0 +1,21 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <key xmlns="http://tail-f.com/ned/cisco-nx">
+                    <chain>
+                        <name>HSRP_KEY</name>
+                        <key>
+                            <id>1</id>
+                            <key-string>
+                                <key-type>0</key-type>
+                                <key-value>{$HSRP_KEY}</key-value>
+                            </key-string>
+                        </key>
+                    </chain>
+                </key>
+            </config>
+        </device>
+    </devices>
+</config-template>

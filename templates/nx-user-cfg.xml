@@ -1,0 +1,22 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <username xmlns="http://tail-f.com/ned/cisco-nx">
+                    <name>{$USERNAME}</name>
+                    <password>
+                        <encryption>0</encryption>
+                        <password>{$USER_PASSWORD}</password>
+                    </password>
+                </username>
+                <username-secondary-roles xmlns="http://tail-f.com/ned/cisco-nx">
+                    <username>
+                        <name>{$USERNAME}</name>
+                        <role>{$USER_ROLE}</role>
+                    </username>
+                </username-secondary-roles>
+            </config>
+        </device>
+    </devices>
+</config-template>

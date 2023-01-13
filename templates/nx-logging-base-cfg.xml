@@ -1,0 +1,18 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <logging xmlns="http://tail-f.com/ned/cisco-nx">
+                    <explicit-source-interface>
+                        <source-interface>
+                            <interface-type>{$MGMT_INTF_TYPE}</interface-type>
+                            <interface-id>{$MGMT_INTF_ID}</interface-id>
+                        </source-interface>
+                    </explicit-source-interface>
+                    <monitor>7</monitor>
+                </logging>
+            </config>
+        </device>
+    </devices>
+</config-template>

@@ -1,0 +1,45 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <snmp-server xmlns="http://tail-f.com/ned/cisco-nx">
+                    <contact>{$CONTACT}</contact>
+                    <community>
+                        <snmp-community-string>{$COMMUNITY}</snmp-community-string>
+                        <group>network-operator</group>
+                    </community>
+                    <community-config>
+                        <community>
+                            <snmp-community-string>{$COMMUNITY}</snmp-community-string>
+                            <use-ipv4acl>MGMT</use-ipv4acl>
+                            <use-ipv6acl>MGMT_v6</use-ipv6acl>
+                        </community>
+                    </community-config>
+                    <location>{$LOCATION}</location>
+                    <source-interface>
+                        <informs>{$MGMT_INTF}</informs>
+                    </source-interface>
+                    <user>
+                        <name>{$USER}</name>
+                        <role>network-admin</role>
+                        <auth>
+                            <sha>{$PASSWORD}</sha>
+                            <priv>
+                                <aes-128>{$PASSWORD}</aes-128>
+                            </priv>
+                        </auth>
+                    </user>
+                    <user-config>
+                        <user>
+                            <name>{$USER}</name>
+                            <use-ipv4acl>MGMT</use-ipv4acl>
+                            <use-ipv6acl>MGMT_v6</use-ipv6acl>
+                        </user>
+                    </user-config>
+                    <globalEnforcePriv/>
+                </snmp-server>
+            </config>
+        </device>
+    </devices>
+</config-template>

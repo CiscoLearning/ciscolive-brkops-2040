@@ -1,0 +1,39 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <Ethernet>
+                        <name>{$INTF_NAME}</name>
+                        <channel-group>
+                            <id>{$PC_NAME}</id>
+                            <?if {$PROTOCOL != "none"}?>
+                            <mode>active</mode>
+                            <?end?>
+                        </channel-group>
+                        <?if {$DESCRIPTION != ""}?>
+                        <description>{$DESCRIPTION}</description>
+                        <?end?>
+                        <?if {$MODE = "cross-dc-link"}?>
+                        <spanning-tree>
+                            <port>
+                                <type>network</type>
+                            </port>
+                        </spanning-tree>
+                        <?else?>
+                        <?if {$MODE = "trunk"}?>
+                        <spanning-tree>
+                            <port>
+                                <type>edge</type>
+                                <trunk/>
+                            </port>
+                        </spanning-tree>
+                        <?end?>
+                        <?end?>
+                    </Ethernet>
+                </interface>
+            </config>
+        </device>
+    </devices>
+</config-template>

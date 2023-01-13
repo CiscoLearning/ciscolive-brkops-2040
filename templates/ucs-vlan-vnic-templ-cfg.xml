@@ -1,0 +1,39 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <org xmlns="http://tail-f.com/ned/cisco-ucs">
+                    <?if {$UCS_ORG != ""}?>
+                    <org>
+                        <name>{$UCS_ORG}</name>
+                        <vnic-templ>
+                            <name>{$UCS_VNIC_TEMPLATE}</name>
+                            <eth-if>
+                                <name>{$VLAN_NAME}</name>
+                                <?if {$NATIVE = "yes"}?>
+                                <default-net>yes</default-net>
+                                <?else?>
+                                <default-net>no</default-net>
+                                <?end?>
+                            </eth-if>
+                        </vnic-templ>
+                    </org>
+                    <?else?>
+                    <vnic-templ>
+                        <name>{$UCS_VNIC_TEMPLATE}</name>
+                        <eth-if>
+                            <name>{$VLAN_NAME}</name>
+                            <?if {$NATIVE = "yes"}?>
+                            <default-net>yes</default-net>
+                            <?else?>
+                            <default-net>no</default-net>
+                            <?end?>
+                        </eth-if>
+                    </vnic-templ>
+                    <?end?>
+                </org>
+            </config>
+        </device>
+    </devices>
+</config-template>

@@ -1,0 +1,157 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <Vlan>
+                        <name>{$VLAN_ID}</name>
+                        <description>{$DESCRIPTION}</description>
+                        <ip>
+                            <flow>
+                                <monitor>
+                                    <direction>input</direction>
+                                    <name>CL-ipv4-nb</name>
+                                </monitor>
+                            </flow>
+                            <?if {$ACCESS_GROUP != ""}?>
+                            <access-group>
+                                <direction>in</direction>
+                                <name>{$ACCESS_GROUP}</name>
+                            </access-group>
+                            <?end?>
+                            <address>
+                                <ipaddr>{$SVI_V4}</ipaddr>
+                            </address>
+                            <?if {$CATEGORY != "peer"}?>
+                            <arp>
+                                <gratuitous>
+                                    <hsrp>
+                                        <duplicate>false</duplicate>
+                                    </hsrp>
+                                </gratuitous>
+                            </arp>
+                            <?end?>
+                            <ospf>
+                                <?if {$CATEGORY = "peer"}?>
+                                <authentication>
+                                    <authentication-type>message-digest</authentication-type>
+                                    <key-chain>OSPF_KEY</key-chain>
+                                </authentication>
+                                <passive-interface>false</passive-interface>
+                                <?end?>
+                                <network>point-to-point</network>
+                            </ospf>
+                            <redirects>false</redirects>
+                            <router>
+                                <ospf>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospf>
+                            </router>
+                        </ip>
+                        <ospfv3>
+                            <network>point-to-point</network>
+                            <?if {$CATEGORY = "peer"}?>
+                            <passive-interface>false</passive-interface>
+                            <?end?>
+                        </ospfv3>
+                        <?if {$SVI_V6 != ""}?>
+                        <ipv6>
+                            <flow>
+                                <monitor>
+                                    <direction>input</direction>
+                                    <name>CL-ipv6-nb</name>
+                                </monitor>
+                            </flow>
+                            <address>
+                                <addresses>
+                                    <addr>{$SVI_V6}</addr>
+                                </addresses>
+                            </address>
+                            <redirects>false</redirects>
+                            <?if {$TRAFFIC_FILTER != ""}?>
+                            <traffic-filter>
+                                <direction>in</direction>
+                                <name>{$TRAFFIC_FILTER}</name>
+                            </traffic-filter>
+                            <?end?>
+                            <router>
+                                <ospfv3>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospfv3>
+                            </router>
+                        </ipv6>
+                        <?else?>
+                        <?if {$LINK_LOCAL = "True"}?>
+                        <ipv6>
+                            <address>
+                                <use-link-local-only/>
+                            </address>
+                            <redirects>false</redirects>
+                            <router>
+                                <ospfv3>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospfv3>
+                            </router>
+                        </ipv6>
+                        <?end?>
+                        <?end?>
+                        <mtu>9216</mtu>
+                        <?if {$BANDWIDTH != ""}?>
+                        <bandwidth>
+                            <bandwidth>10000000</bandwidth>
+                        </bandwidth>
+                        <?end?>
+                        <!-- We don't need HSRP on peering links. -->
+                        <?if {$CATEGORY != "peer"}?>
+                        <hsrp>
+                            <version>2</version>
+                            <hsrp-list>
+                                <id>1</id>
+                                <addr_type>ipv4</addr_type>
+                                <authentication>
+                                    <md5>
+                                        <key-chain>HSRP_KEY</key-chain>
+                                    </md5>
+                                </authentication>
+                                <ip>
+                                    <address>{$HSRP_V4_VIP}</address>
+                                </ip>
+                                <timers>
+                                    <hello-seconds>1</hello-seconds>
+                                    <hold-seconds>3</hold-seconds>
+                                </timers>
+                                <preempt/>
+                                <priority>{$HSRP_PRIORITY}</priority>
+                            </hsrp-list>
+                            <?if {$SVI_V6 != ""}?>
+                            <hsrp-list>
+                                <id>2</id>
+                                <addr_type>ipv6</addr_type>
+                                <authentication>
+                                    <md5>
+                                        <key-chain>HSRP_KEY</key-chain>
+                                    </md5>
+                                </authentication>
+                                <ip>
+                                    <address>{$HSRP_V6_VIP}</address>
+                                </ip>
+                                <timers>
+                                    <hello-seconds>1</hello-seconds>
+                                    <hold-seconds>3</hold-seconds>
+                                </timers>
+                                <preempt/>
+                                <priority>{$HSRP_PRIORITY}</priority>
+                            </hsrp-list>
+                            <?end?>
+                        </hsrp>
+                        <?end?>
+                    </Vlan>
+                </interface>
+            </config>
+        </device>
+    </devices>
+</config-template>

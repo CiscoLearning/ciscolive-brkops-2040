@@ -1,0 +1,15 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <ntp xmlns="http://tail-f.com/ned/cisco-nx">
+                    <server>
+                        <id>{$SERVER}</id>
+                        <use-vrf>default</use-vrf>
+                    </server>
+                </ntp>
+            </config>
+        </device>
+    </devices>
+</config-template>

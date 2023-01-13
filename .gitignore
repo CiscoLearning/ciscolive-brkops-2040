@@ -1,0 +1,5 @@
+venv/
+.vscode
+base-configs/*.cfg
+base-configs/secrets.yaml
+packages/*

@@ -1,0 +1,31 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <tacacs-server xmlns="http://tail-f.com/ned/cisco-nx">
+                    <host>
+                        <id>{$SERVER}</id>
+                        <secret>
+                            <key>0</key>
+                            <shared-secret>{$KEY}</shared-secret>
+                        </secret>
+                        <timeout>10</timeout>
+                    </host>
+                </tacacs-server>
+                <aaa xmlns="http://tail-f.com/ned/cisco-nx">
+                    <group>
+                        <server>
+                            <tacacs-plus>
+                                <id>AAA</id>
+                                <server>
+                                    <id>{$SERVER}</id>
+                                </server>
+                            </tacacs-plus>
+                        </server>
+                    </group>
+                </aaa>
+            </config>
+        </device>
+    </devices>
+</config-template>

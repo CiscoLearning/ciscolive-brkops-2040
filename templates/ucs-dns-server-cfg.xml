@@ -1,0 +1,16 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <system xmlns="http://tail-f.com/ned/cisco-ucs">
+          <services>
+            <dns>
+              <dns-name>{$SERVER}</dns-name>
+            </dns>
+          </services>
+        </system>
+      </config>
+    </device>
+  </devices>
+</config-template>

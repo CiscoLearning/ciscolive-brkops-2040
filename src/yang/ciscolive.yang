@@ -1,0 +1,867 @@
+module ciscolive {
+    namespace "http://example.com/ciscolive";
+    prefix ciscolive;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+    import tailf-common {
+        prefix tailf;
+    }
+    import tailf-ncs {
+        prefix ncs;
+    }
+    import tailf-ned-cisco-ucs {
+        prefix ucs;
+    }
+    import tailf-ned-cisco-nx {
+        prefix nx;
+    }
+    import tailf-ned-vmware-vsphere-portgroup-cfg {
+        prefix vmw;
+    }
+
+    description
+      "Data model for the CiscoLive data center network.";
+
+    revision 2021-11-25 {
+        description
+          "Initial revision.";
+    }
+
+    typedef segment-category {
+        tailf:info "Usage category of a given segment.";
+        type enumeration {
+            enum vm {
+                tailf:info "Segment is used for virtual machines.";
+            }
+            enum netapp {
+                tailf:info "Segment is used for NetApp-only traffic.";
+            }
+            enum fabric-interconnect {
+                tailf:info "Segment is used for FI-only traffic.";
+            }
+            enum peer {
+                tailf:info "Segment is used for route peering.";
+            }
+        }
+    }
+
+    grouping route-common {
+        leaf redistribute {
+            tailf:info "Redistribute this route into OSPF.";
+            tailf:cli-boolean-no;
+            type boolean;
+            default "false";
+        }
+        leaf data-center {
+            tailf:info "Data Center to which this route applies (default is both).";
+            type leafref {
+                path "/ciscolive/data-center/id";
+            }
+        }
+    }
+
+    grouping description-details {
+        choice single-description-or-list {
+            case single-description {
+                leaf description {
+                    tailf:info "Interface description for this interface on all switches.";
+                    tailf:cli-suppress-quotes;
+                    type string;
+                }
+            }
+            case description-list {
+                leaf-list description-list {
+                    tailf:info "Interface description per switch (DC1/SW1, DC1/SW2, ...).";
+                    ordered-by user;
+                    type string;
+                    min-elements 2;
+                    max-elements 4;
+                }
+            }
+        }
+    }
+
+    grouping interface-details {
+        uses description-details;
+        leaf mode {
+            tailf:info "Type of interface.  The 'edge' mode is considered an error for port-channels.";
+            type enumeration {
+                enum access {
+                    tailf:info "This interface is an access port in a given VLAN.";
+                }
+                enum trunk {
+                    tailf:info "This interface is a trunk port.";
+                }
+                enum edge {
+                    tailf:info "This is a routed interface connected to the network edge.";
+                }
+                enum cross-dc-link {
+                    tailf:info "This link connects DCs.";
+                }
+            }
+        }
+        leaf-list category {
+            tailf:info "Usage category of this interface.";
+            type segment-category;
+            when '../mode = "trunk"';
+            min-elements 1;
+        }
+        leaf vlan {
+            tailf:info "Access VLAN for this interface.";
+            type leafref {
+                path "/ciscolive/vlan/id";
+            }
+            when '../mode = "access"';
+            mandatory true;
+        }
+        leaf-list allowed-vlan {
+            tailf:info "List of allowed VLANs for this trunk.  If this is omitted, VLAN list will be built based on category.";
+            tailf:cli-range-list-syntax;
+            type leafref {
+                path "/ciscolive/vlan/id";
+            }
+            when '../mode = "trunk"';
+        }
+    /*leaf access-group {
+     *     tailf:info "IPv4 access-list name to apply inbound on this interface.";
+     *     type leafref {
+     *         path "deref(../../../device)/../ncs:config/nx:ip/nx:access-list/nx:list-name/nx:id";
+     *     }
+     *     when '../mode = "edge"';
+     * }
+     * leaf traffic-filter {
+     *     tailf:info "IPv6 access-list name to apply inbound on this interface.";
+     *     type leafref {
+     *         path "deref(../../../device)/../ncs:config/nx:ipv6/nx:access-list/nx:list-name/nx:id";
+     *     }
+     *     when '../mode = "edge"';
+     }*/
+    }
+
+    list ciscolive {
+        tailf:info "An instance of the CiscoLive network for a given year and location.";
+        tailf:cli-full-command;
+        uses ncs:service-data;
+        ncs:servicepoint "ciscolive-servicepoint";
+        key "location year";
+        leaf location {
+            tailf:info "Location of this instance of the CiscoLive network.";
+            type string;
+        }
+        leaf year {
+            tailf:info "Year for this instance of the CiscoLive DC network.";
+            type uint16;
+        }
+        leaf contact {
+            tailf:info "Point of contact for the NOC.";
+            type string;
+            mandatory true;
+        }
+        leaf bandwidth {
+            tailf:info "Max interface bandwidth across all DCs.";
+            type uint64;
+            units "kbps";
+            default "100000000";
+        }
+        container management {
+            tailf:info "Global management-related configuration.";
+            tailf:cli-add-mode;
+            container interface {
+                tailf:info "Management interface details.";
+                tailf:cli-add-mode;
+                leaf v4-subnet {
+                    tailf:info "IPv4 subnet for the management interface.";
+                    type inet:ipv4-prefix;
+                    mandatory true;
+                }
+                leaf v6-prefix {
+                    tailf:info "IPv6 prefix for the management interface.";
+                    type inet:ipv6-prefix;
+                    mandatory true;
+                }
+            }
+            leaf-list v4-network {
+                tailf:info "List of IPv4 networks used for management.";
+                tailf:cli-flat-list-syntax;
+                type inet:ipv4-prefix;
+                min-elements 1;
+            }
+            leaf-list v6-network {
+                tailf:info "List of IPv6 networks used for management.";
+                tailf:cli-flat-list-syntax;
+                type inet:ipv6-prefix;
+                min-elements 1;
+            }
+        }
+        container routing {
+            tailf:info "Global static routing configuration.";
+            tailf:cli-add-mode;
+            list ip {
+                tailf:info "IPv4 static route.";
+                tailf:cli-suppress-mode;
+                key "prefix next-hop";
+                leaf prefix {
+                    tailf:info "Destination network prefix.";
+                    type inet:ipv4-prefix;
+                }
+                leaf next-hop {
+                    tailf:info "Next-hop gateway for prefix.";
+                    type inet:ipv4-address;
+                }
+                uses route-common;
+            }
+            list ipv6 {
+                tailf:info "IPv6 static route.";
+                tailf:cli-suppress-mode;
+                key "prefix next-hop";
+                leaf prefix {
+                    tailf:info "Destination network prefix.";
+                    type inet:ipv6-prefix;
+                }
+                leaf next-hop {
+                    tailf:info "Next-hop gateway for prefix.";
+                    type inet:ipv6-address;
+                }
+                uses route-common;
+            }
+        }
+        container pim {
+            tailf:info "Protocol Independnent Multicast configuration.";
+            tailf:cli-add-mode;
+            leaf rp {
+                tailf:info "PIM rendez-vous point.";
+                type inet:ipv4-address;
+            }
+            leaf ssm-range {
+                tailf:info "SSM range.";
+                type inet:ipv4-prefix;
+                when '../rp';
+                mandatory true;
+            }
+        }
+        container dns {
+            tailf:info "CiscoLive-wide DNS configuration.";
+            tailf:cli-add-mode;
+            leaf-list server {
+                tailf:info "List of IPv4 DNS servers for general use.";
+                tailf:cli-flat-list-syntax;
+                ordered-by user;
+                type inet:ipv4-address;
+                min-elements 2;
+            }
+            leaf domain {
+                tailf:info "DNS domain name.";
+                type inet:domain-name;
+                mandatory true;
+            }
+            leaf-list v6-server {
+                tailf:info "List of DNS servers to hand out via stateless DHCP.";
+                tailf:cli-flat-list-syntax;
+                ordered-by user;
+                type inet:ipv6-address;
+                min-elements 2;
+            }
+            leaf-list search-list {
+                tailf:info "List of DNS domains to search.";
+                tailf:cli-flat-list-syntax;
+                ordered-by user;
+                type inet:domain-name;
+            }
+        }
+        container dhcp {
+            tailf:info "CiscoLive-wide DHCP configuration.";
+            leaf-list relay {
+                tailf:info "List of DHCPv4 relay addresses.";
+                tailf:cli-flat-list-syntax;
+                ordered-by user;
+                type inet:ipv4-address;
+                min-elements 2;
+            }
+        }
+        container security {
+            tailf:info "Global security parameters for this CiscoLive.";
+            tailf:cli-add-mode;
+            leaf ospf-key {
+                tailf:info "Key to use for MD5 message digest for OSPF.";
+                type tailf:aes-cfb-128-encrypted-string;
+                mandatory true;
+            }
+            leaf hsrp-key {
+                tailf:info "Key to use for HSRP MD5 message digests.";
+                type tailf:aes-cfb-128-encrypted-string;
+                mandatory true;
+            }
+            list user {
+                tailf:info "List of local users.";
+                key "name";
+                leaf name {
+                    tailf:info "Local username.";
+                    type string;
+                }
+                leaf role {
+                    tailf:info "NX-OS role for the user.";
+                    type enumeration {
+                        enum network-admin;
+                        enum network-operator;
+                    }
+                    mandatory true;
+                }
+                leaf password {
+                    tailf:info "Password for the user.";
+                    type tailf:aes-cfb-128-encrypted-string;
+                    mandatory true;
+                }
+            }
+            container aaa {
+                tailf:info "Global AAA server configuration (for TACACS+).";
+                tailf:cli-add-mode;
+                leaf-list server {
+                    tailf:info "AAA servers to use for authentication and authorization.";
+                    tailf:cli-flat-list-syntax;
+                    ordered-by user;
+                    type inet:ipv4-address;
+                    min-elements 2;
+                }
+                leaf tacplus-key {
+                    tailf:info "Secret key to use for obfuscating TACACS+.";
+                    type tailf:aes-cfb-128-encrypted-string;
+                    mandatory true;
+                }
+            }
+        }
+        container ntp {
+            tailf:info "Global NTP server configuration.";
+            leaf-list server {
+                tailf:info "NTP servers.";
+                tailf:cli-flat-list-syntax;
+                ordered-by user;
+                type inet:ipv4-address;
+                min-elements 2;
+            }
+        }
+        container snmp {
+            tailf:info "Global SNMP configuration";
+            tailf:cli-add-mode;
+            leaf community {
+                tailf:info "SNMP community string (read-only)";
+                type tailf:aes-cfb-128-encrypted-string;
+            }
+            leaf user {
+                tailf:info "SNMPv3 username.";
+                type string;
+                mandatory true;
+            }
+            leaf password {
+                tailf:info "SNMPv3 password.";
+                type tailf:aes-cfb-128-encrypted-string;
+                mandatory true;
+            }
+        }
+        container logging {
+            tailf:info "Global logging configuration";
+            leaf-list server {
+                tailf:info "Syslog servers.";
+                tailf:cli-flat-list-syntax;
+                ordered-by user;
+                type inet:ipv4-address;
+                min-elements 1;
+            }
+        }
+        container netflow {
+            tailf:info "Global NetFlow configuration";
+            leaf exporter {
+                tailf:info "IP address of flow exporter server.";
+                type inet:ipv4-address;
+                mandatory true;
+            }
+        }
+        list vcenter {
+            tailf:info "vCenter for this CiscoLive.";
+            key "device";
+            leaf device {
+                tailf:info "vCenter device name.";
+                type leafref {
+                    path "/ncs:devices/ncs:device/ncs:name";
+                }
+                mandatory true;
+                must 'contains(deref(.)/../ncs:device-type/ncs:generic/ncs:ned-id, "vmware-vsphere")' {
+                    error-message
+                      "vcenter devices must use the vmware-vsphere NED";
+                    tailf:dependency ".";
+                }
+            }
+            container datacenter {
+                tailf:info "The VMware Datacenter object that has a relevant vSwitch.";
+                tailf:cli-add-mode;
+                leaf name {
+                    tailf:info "The VMware Datacenter name that contains the relevant vSwitch.";
+                    type leafref {
+                        path "deref(../../device)/../ncs:config/vmw:vCenter/vmw:datacenter/vmw:name";
+                    }
+                    mandatory true;
+                }
+                leaf cross-dc-vswitch {
+                    tailf:info "The VMware vSwitch name for cross-DC VLANs.";
+                    type leafref {
+                        path "deref(../name)/../vmw:vSwitch/vmw:name";
+                    }
+                    must 'count(/ciscolive/vcenter[device=current()/../../device]/datacenter[name=current()/../name]/cross-dc-vswitch[. = current()]) <= 1 or
+                    count(/ciscolive/vcenter[device=current()/../../device]/datacenter[name=current()/../name]/dc-vswitch[. = current()]) <= 1' {
+                        error-message
+                          "A vSwitch cannot be a part of more than one CiscoLive.";
+                    }
+                    mandatory true;
+                }
+                leaf-list dc-vswitch {
+                    tailf:info "The VMware vSwitch name for the DC-specific VLANs.";
+                    type leafref {
+                        path "deref(../name)/../vmw:vSwitch/vmw:name";
+                    }
+                    must 'count(/ciscolive/vcenter[device=current()/../../device]/datacenter[name=current()/../name]/cross-dc-vswitch[. = current()]) <= 1 or
+                    count(/ciscolive/vcenter[device=current()/../../device]/datacenter[name=current()/../name]/dc-vswitch[. = current()]) <= 1' {
+                        error-message
+                          "A vSwitch cannot be part of more than one CiscoLive.";
+                    }
+                    min-elements 2;
+                    max-elements 2;
+                }
+            }
+            // min-elements 1;
+            max-elements 1;
+        }
+        list vlan {
+            tailf:info "VLANs for use in this instance of CiscoLive.";
+            key "id";
+            leaf id {
+                tailf:info "VLAN ID.";
+                type uint16 {
+                    range "1..3967";
+                }
+            }
+            leaf name {
+                tailf:info "VLAN Name.";
+                type string {
+                    length "1..128";
+                }
+                mandatory true;
+            }
+            leaf category {
+                tailf:info "Usage category of VLAN.";
+                type segment-category;
+                default "vm";
+            }
+            leaf cross-dc {
+                tailf:info "VLAN carried on L2 link between DCs.";
+                tailf:cli-boolean-no;
+                type boolean;
+                default "true";
+                when '../category != "peer"';
+            }
+            leaf routed {
+                tailf:info "VLAN should have an SVI.";
+                tailf:cli-boolean-no;
+                type boolean;
+                default "true";
+            }
+            leaf dhcp {
+                tailf:info "VLAN has a DHCP server.";
+                tailf:cli-boolean-no;
+                type boolean;
+                mandatory true;
+                when '../routed = "true" and ../category != "peer"';
+            }
+            leaf native {
+                tailf:info "VLAN should be native for UCS.";
+                tailf:cli-boolean-no;
+                type boolean;
+                default "false";
+            }
+            container ip {
+                tailf:info "IPv4-related commands.";
+                tailf:cli-add-mode;
+                choice prefix-or-dc {
+                    case prefix {
+                        leaf prefix {
+                            tailf:info "IPv4 prefix for use when the VLAN is routed and cross-dc.";
+                            type inet:ipv4-prefix;
+                            mandatory true;
+                        }
+                        when '../category != "peer" and ../cross-dc = "true"';
+                    }
+                    case dc {
+                        list data-center {
+                            tailf:info "Per-data-center IPv4 configuration.";
+                            tailf:cli-suppress-mode;
+                            key "id";
+                            leaf id {
+                                tailf:info "Data Center ID.";
+                                type leafref {
+                                    path "/ciscolive/data-center/id";
+                                }
+                            }
+                            leaf prefix {
+                                tailf:info "IPv4 prefix for this DC.";
+                                type inet:ipv4-prefix;
+                                mandatory true;
+                            }
+                            min-elements 2;
+                            max-elements 2;
+                        }
+                        when '../category = "peer" or ../cross-dc = "false"';
+                    }
+                }
+                leaf access-group {
+                    tailf:info "IPv4 access-list to apply to the VLAN SVI.";
+                    type string;
+                /*
+                 * We don't want a leafref here even if we could since ACLs will be managed by The Tool.
+                 */
+                }
+                when '../routed = "true"';
+            }
+            container ipv6 {
+                tailf:info "IPv6-related commands.";
+                tailf:cli-add-mode;
+                choice prefix-or-dc {
+                    case prefix {
+                        leaf prefix {
+                            tailf:info "IPv6 prefix for use when the VLAN is routed and cross-dc.";
+                            type inet:ipv6-prefix;
+                        }
+                        when '../category != "peer" and ../cross-dc = "true"';
+                    }
+                    case dc {
+                        list data-center {
+                            tailf:info "Per-data-center IPv6 configuration.";
+                            tailf:cli-suppress-mode;
+                            key "id";
+                            leaf id {
+                                tailf:info "Data Center ID.";
+                                type leafref {
+                                    path "/ciscolive/data-center/id";
+                                }
+                            }
+                            leaf prefix {
+                                tailf:info "IPv6 prefix for this DC.";
+                                type inet:ipv6-prefix;
+                                mandatory true;
+                            }
+                            max-elements 2;
+                        }
+                        when '../category = "peer" or ../cross-dc = "false"';
+                    }
+                }
+                leaf traffic-filter {
+                    tailf:info "IPv6 access-list to apply to the VLAN SVI.";
+                    type string;
+                    when '
+                    (
+                        (../../category != "peer" and ../../cross-dc = "true" and ../prefix != "") or
+                        ((../../category = "peer" or ../../cross-dc = "false") and count(../data-center) > 0)
+                    )';
+                /*
+                 * We don't want a leafref here even if we could since ACLs will be managed by The Tool.
+                 */
+                }
+                leaf link-local-only {
+                    tailf:info "Use link-local addresses only on this SVI.";
+                    tailf:cli-boolean-no;
+                    type boolean;
+                    default "true";
+                    when '
+                    (
+                        (../../category != "peer" and ../../cross-dc = "true" and ../prefix = "") or
+                        ((../../category = "peer" or ../../cross-dc = "false") and count(../data-center) = 0)
+                    )';
+                }
+                when '../routed = "true"';
+                must '
+                (
+                    (../cross-dc = "true") or
+                    (../category = "peer" and (count(data-center) = 2 or count(data-center) = 0)) or
+                    (../cross-dc = "false" and (count(data-center) = 2 or count(data-center) = 0))
+                )' {
+                    error-message
+                      "Invalid number of prefix elements (cross-dc can have at most one, non-cross-dc needs 0 or 2).";
+                }
+            }
+        }
+        container vpc-peer {
+            tailf:info "vPC peer information such as keepalive link and peer link.";
+            tailf:cli-add-mode;
+            leaf peer-port-channel {
+                tailf:info "Peer port-channel ID.";
+                type uint16 {
+                    range "1..4096";
+                }
+                mandatory true;
+            }
+            leaf-list member-interface {
+                tailf:info "Member interface(s) for the vPC peer link.";
+                tailf:cli-range-list-syntax;
+                type string {
+                    pattern
+                      '[0-9]+/[0-9]+(/[0-9]+)?';
+                }
+                min-elements 1;
+            }
+            leaf keepalive-interface {
+                tailf:info "Interface to use for vPC keepalives (either mgmt0 or an Ethernet interface number).";
+                type union {
+                    type enumeration {
+                        enum mgmt0;
+                    }
+                    type string {
+                        pattern
+                          '[0-9]+/[0-9]+(/[0-9]+)?';
+                    }
+                }
+                default "mgmt0";
+            }
+        }
+        container interface {
+            tailf:info "Physical interface configuration.";
+            tailf:cli-add-mode;
+            list Ethernet {
+                tailf:info "List of ethernet interfaces.";
+                tailf:cli-allow-join-with-key;
+                key "name";
+                leaf name {
+                    tailf:info "Ethernet interface name.";
+                    type string {
+                        pattern
+                          '[0-9]+/[0-9]+(/[0-9]+)?';
+                    }
+                    must "count(/ciscolive/vpc-peer/member-interface[. = current()]) < 1" {
+                        error-message
+                          "Interface cannot be used as a vPC peer link.";
+                    }
+                    must "count(../../port-channel/member-interface/name[. = current()]) < 1" {
+                        error-message
+                          "Interface cannot be used as it is already a port-channel member.";
+                    }
+                    must "count(/ciscolive/vpc-peer/keepalive-interface[. = current()]) < 1" {
+                        error-message
+                          "Interface cannot be used as it is already a vPC keepalive interface.";
+                    }
+                }
+                leaf speed {
+                    tailf:info "Port speed when this port is less than 10 Gbps.";
+                    type enumeration {
+                        enum 100 {
+                            tailf:info "100 Mbps";
+                        }
+                        enum 1000 {
+                            tailf:info "1 Gbps";
+                        }
+                    }
+                }
+                container ip {
+                    tailf:info "IPv4 commands for edge interfaces.";
+                    leaf-list address {
+                        tailf:info "IPv4 address for interface on each switch (used with /31).";
+                        ordered-by user;
+                        type inet:ipv4-address;
+                        min-elements 4;
+                        max-elements 4;
+                        when '../../mode = "edge"';
+                    }
+                }
+                container ipv6 {
+                    tailf:info "IPv6 related commands for edge interfaces.";
+                    leaf-list address {
+                        tailf:info "IPv6 adress for interface on each switch (used with /127).  Link locals are used if omitted.";
+                        ordered-by user;
+                        type inet:ipv6-address;
+                        max-elements 4;
+                        when '../../mode = "edge"';
+                        must "count(.) = 0 or count(.) = 4" {
+                            error-message
+                              "Either no IPv6 addresses should be specified or an address for each switch should be specified.";
+                        }
+                    }
+                }
+                uses interface-details;
+                must 'mode = "access" or mode = "edge"' {
+                    error-message
+                      "Ethernet interfaces can only be access or edge ports.";
+                }
+            }
+            list port-channel {
+                tailf:info "List of port-channel interfaces on this switch.";
+                tailf:cli-allow-join-with-key;
+                key "name";
+                leaf name {
+                    tailf:info "Port-channel interface name.";
+                    type uint16 {
+                        range "1..4096";
+                    }
+                    must "/ciscolive/vpc-peer/peer-port-channel != current()" {
+                        error-message
+                          "Port-channel ID is used by the vpc-peer-link.";
+                    }
+                }
+                leaf protocol {
+                    tailf:info "Port-channel protocol.";
+                    type enumeration {
+                        enum lacp;
+                        enum none;
+                    }
+                    default "lacp";
+                }
+                list member-interface {
+                    tailf:info "Member interfaces of this port-channel.";
+                    key "name";
+                    leaf name {
+                        type string {
+                            pattern
+                              '[0-9]+/[0-9]+(/[0-9]+)?';
+                        }
+                    }
+                    uses description-details;
+                    min-elements 1;
+                }
+                uses interface-details;
+                must 'mode != "edge"' {
+                    error-message
+                      "'edge' is an invalid mode for port-channels.";
+                }
+            }
+        }
+        list data-center {
+            tailf:info "An instance of a data center site.";
+            key "id";
+            leaf id {
+                tailf:info "Numeric ID of the data center.  There can only be two.";
+                type uint8 {
+                    range "1..2";
+                }
+            }
+            leaf location {
+                tailf:info "Physical location of this data center.";
+                type string;
+                mandatory true;
+            }
+            list switch {
+                tailf:info "A set of two switches that serve this DC site.";
+                key "id";
+                leaf id {
+                    tailf:info "Numeric ID of the switch.  Switch 1 is the primary and switch 2 is the secondary.";
+                    type uint8 {
+                        range "1..2";
+                    }
+                }
+                leaf device {
+                    tailf:info "Switch name.";
+                    type leafref {
+                        path "/ncs:devices/ncs:device/ncs:name";
+                    }
+                    mandatory true;
+                    must "count(/ciscolive/data-center/switch/device[. = current()]) = 1" {
+                        error-message
+                          "Switch can only be part of one DC site in one CiscoLive.";
+                    }
+                    must 'contains(/ncs:devices/ncs:device[ncs:name=current()]/ncs:device-type/ncs:cli/ncs:ned-id, "cisco-nx")' {
+                        error-message
+                          "Switches must use the NX-OS CLI NED.";
+                    }
+                }
+                leaf keepalive-ip {
+                    tailf:info "IP address of the vPC keepalive IP (used with a /30).";
+                    type inet:ipv4-address;
+                    mandatory true;
+                }
+                min-elements 2;
+                max-elements 2;
+            }
+            list fabric-interconnect {
+                tailf:info "List of Fabric Interconnects for a given DC site.";
+                key "device";
+                leaf device {
+                    tailf:info "FI device name.";
+                    type leafref {
+                        path "/ncs:devices/ncs:device/ncs:name";
+                    }
+                    must 'contains(/ncs:devices/ncs:device[ncs:name=current()]/ncs:device-type/ncs:cli/ncs:ned-id, "cisco-ucs")' {
+                        error-message
+                          "fabric-interconnects must use a UCS NED.";
+                    }
+                }
+                must "count(/ciscolive/data-center/fabric-interconnect/device[text() = current()]) <= 1" {
+                    error-message
+                      "A fabric interconnect cannot be a part of more than one DC site.";
+                    tailf:dependency ".";
+                }
+                list vnic-template-trunk {
+                    tailf:info "A vNic Template that will act as a fabric trunk, passing all network segments to connected service profiles.";
+                    ordered-by user;
+                    key "name";
+                    leaf name {
+                        type string;
+                        tailf:info "Unique name of this vNic Template Trunk.";
+                    }
+                    choice org-or-root {
+                        case org {
+                            leaf org {
+                                type leafref {
+                                    path "/ncs:devices/ncs:device[ncs:name=current()/../../device]/ncs:config/ucs:org/ucs:org/ucs:name";
+                                }
+                                tailf:info "Org name for this vNic Template.";
+                            }
+                        }
+                        case root {
+                            leaf root-org {
+                                type empty;
+                                tailf:info "This vNic Template should be at the root of the org tree.";
+                            }
+                        }
+                        mandatory true;
+                    }
+                    choice root-or-org-templ {
+                        case org-templ {
+                            leaf vnic-template {
+                                type leafref {
+                                    path "/ncs:devices/ncs:device[ncs:name=current()/../../device]/ncs:config/ucs:org/ucs:org[ucs:name=current()/../org]/ucs:vnic-templ/ucs:name";
+                                }
+                                when '../org != ""';
+                                tailf:info "vNic Template name under the parent org.";
+                            }
+                        }
+                        case root-templ {
+                            leaf root-vnic-template {
+                                type leafref {
+                                    path "/ncs:devices/ncs:device[ncs:name=current()/../../device]/ncs:config/ucs:org/ucs:vnic-templ/ucs:name";
+                                }
+                                when "../root-org";
+                                tailf:info "Root-level vNic Template name.";
+                            }
+                        }
+                        mandatory true;
+                    }
+                    leaf description {
+                        type string;
+                        tailf:info "Useful information about this vnic-template";
+                    }
+                    leaf needs-native {
+                        tailf:info "This template needs a native VLAN.";
+                        tailf:cli-boolean-no;
+                        type boolean;
+                        default "false";
+                    }
+                }
+            /*
+             * The FIs are generally added as a single UCSM (i.e., the cluster).  We only need a minimum of 1 for a DC.
+             * While we want to limit the number of UCSM domains in a site, we will not enforce a max here.
+             * 
+             * Another thing to note is that requiring at least one FI will trigger a chicken/egg problem since this
+             * service is used to bootstrap the N9Ks that frontend access to the FIs.
+             */
+            // min-elements 1;
+            }
+            min-elements 2;
+            max-elements 2;
+        }
+    }
+}

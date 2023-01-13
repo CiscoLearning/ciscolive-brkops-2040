@@ -1,0 +1,25 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <ipv6 xmlns="http://tail-f.com/ned/cisco-nx">
+                    <access-list>
+                        <list-name>
+                            <id>MGMT_v6</id>
+                            <sequence>
+                                <id>{$SEQ}</id>
+                                <action>permit</action>
+                                <protocol>ip</protocol>
+                                <source>
+                                    <address-and-prefix>{$NETWORK}</address-and-prefix>
+                                </source>
+                                <any/>
+                            </sequence>
+                        </list-name>
+                    </access-list>
+                </ipv6>
+            </config>
+        </device>
+    </devices>
+</config-template>

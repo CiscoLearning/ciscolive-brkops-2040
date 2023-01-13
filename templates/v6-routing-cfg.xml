@@ -1,0 +1,33 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <ipv6 xmlns="http://tail-f.com/ned/cisco-nx">
+                    <?if {$REDISTRIBUTE = "True"}?>
+                    <access-list>
+                        <list-name>
+                            <id>StaticOSPFListv6</id>
+                            <sequence>
+                                <id>{$SEQ}</id>
+                                <action>permit</action>
+                                <protocol>ipv6</protocol>
+                                <source>
+                                    <address-and-prefix>{$PREFIX}</address-and-prefix>
+                                </source>
+                                <any/>
+                            </sequence>
+                        </list-name>
+                    </access-list>
+                    <?end?>
+                    <route>
+                        <ipv6-route-list>
+                            <prefix-mask>{$PREFIX}</prefix-mask>
+                            <next-hop>{$DESTINATION}</next-hop>
+                        </ipv6-route-list>
+                    </route>
+                </ipv6>
+            </config>
+        </device>
+    </devices>
+</config-template>

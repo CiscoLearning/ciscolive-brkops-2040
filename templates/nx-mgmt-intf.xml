@@ -1,0 +1,41 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <loopback>
+                        <name>0</name>
+                        <ip>
+                            <address>
+                                <ipaddr>{$V4_ADDR}</ipaddr>
+                            </address>
+                            <ospf>
+                                <network>point-to-point</network>
+                            </ospf>
+                            <router>
+                                <ospf>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospf>
+                            </router>
+                        </ip>
+                        <ipv6>
+                            <address>
+                                <addresses>
+                                    <addr>{$V6_ADDR}</addr>
+                                </addresses>
+                            </address>
+                            <router>
+                                <ospfv3>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospfv3>
+                            </router>
+                        </ipv6>
+                    </loopback>
+                </interface>
+            </config>
+        </device>
+    </devices>
+</config-template>

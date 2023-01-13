@@ -1,0 +1,36 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <aaa xmlns="http://tail-f.com/ned/cisco-nx">
+                    <group>
+                        <server>
+                            <tacacs-plus>
+                                <id>AAA</id>
+                                <source-interface>{$MGMT_INTF}</source-interface>
+                                <deadtime>10</deadtime>
+                            </tacacs-plus>
+                        </server>
+                    </group>
+                    <authentication>
+                        <login>
+                            <console>
+                                <fallback>local</fallback>
+                            </console>
+                            <default>
+                                <group>AAA</group>
+                                <fallback>local</fallback>
+                            </default>
+                        </login>
+                    </authentication>
+                </aaa>
+                <ip xmlns="http://tail-f.com/ned/cisco-nx">
+                    <tacacs>
+                        <source-interface>{$MGMT_INTF}</source-interface>
+                    </tacacs>
+                </ip>
+            </config>
+        </device>
+    </devices>
+</config-template>

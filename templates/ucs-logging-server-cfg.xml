@@ -1,0 +1,17 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <monitoring xmlns="http://tail-f.com/ned/cisco-ucs">
+          <syslog>
+            <remote-destination>
+              <server>server-{$SERVER_NUM}</server>
+              <hostname>{$SERVER}</hostname>
+            </remote-destination>
+          </syslog>
+        </monitoring>
+      </config>
+    </device>
+  </devices>
+</config-template>
