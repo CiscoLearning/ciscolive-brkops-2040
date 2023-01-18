@@ -483,8 +483,10 @@ class CiscoLiveServiceCreate(Service):
         member_vars.add("MODE", port_channel.mode)
         member_vars.add("PROTOCOL", port_channel.protocol)
 
-        if intf.name not in self.root.devices.device[switch.device].config.interface.Ethernet:
-            raise ValueError(f"Member interface {intf.name} is not a valid Ethernet interface.")
+        # This will actually fail once an interface becomes "owned" by the service.
+        # This will fail later on when an invalid interface is configured, so this check isn't critical.
+        # if intf.name not in self.root.devices.device[switch.device].config.interface.Ethernet:
+        #     raise ValueError(f"Member interface {intf.name} is not a valid Ethernet interface.")
 
         if "ciscolive:description" in intf and intf.description and intf["ciscolive:description"] != "":
             # This member has the same description on all switches.
@@ -519,8 +521,10 @@ class CiscoLiveServiceCreate(Service):
         sindex = get_switch_index(dc.id, switch.id)
 
         for intf in self.service.interface.Ethernet:
-            if intf.name not in self.root.devices.device[switch.device].config.interface.Ethernet:
-                raise ValueError(f"Interface {intf.name} is not a valid Ethernet interface.")
+            # This will fail once the interface actually becomes owned by the service.
+            # This will fail later on when an invalid interface is configured, so this check isn't critical.
+            # if intf.name not in self.root.devices.device[switch.device].config.interface.Ethernet:
+            #     raise ValueError(f"Interface {intf.name} is not a valid Ethernet interface for {switch.device}.")
 
             ethernet_vars.add("INTF_NAME", intf.name)
             if "ciscolive:description" in intf and intf.description and intf["ciscolive:description"] != "":
