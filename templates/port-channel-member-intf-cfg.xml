@@ -9,6 +9,15 @@
                         <enable>
                             <switchport>true</switchport>
                         </enable>
+                        <mtu>9216</mtu>
+                        <switchport>
+                            <mode>{$MODE}</mode>
+                            <?if {$MODE = "access"}?>
+                            <access>
+                                <vlan>{$ACCESS_VLAN}</vlan>
+                            </access>
+                            <?end?>
+                        </switchport>
                         <channel-group>
                             <id>{$PC_NAME}</id>
                             <?if {$PROTOCOL != "none"}?>

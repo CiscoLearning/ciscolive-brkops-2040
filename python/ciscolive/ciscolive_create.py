@@ -464,6 +464,40 @@ class CiscoLiveServiceCreate(Service):
             self.log.info(f"Applying template port-channel-allowed-vlan-cfg with VLAN {vlan}")
             allowed_vlan_templ.apply("port-channel-allowed-vlan-cfg", allowed_vlan_vars)
 
+    def setup_port_channel_member_allowed_vlans(self, dc, switch, port_channel, intf):
+        """
+        Configure allowed VLANs per port-channel member interface.
+        """
+
+        self.log.info(
+            f"Calling setup_port_channel_member_allowed_vlans for DC {dc.id} with switch ID {switch.id}, name {switch.device},"
+            f"interface {intf.name}"
+        )
+
+        allowed_vlan_vars = ncs.template.Variables()
+        allowed_vlan_templ = ncs.template.Template(self.service)
+
+        allowed_vlan_vars.add("DEVICE", switch.device)
+        allowed_vlan_vars.add("INTF_NAME", intf.name)
+
+        allowed_vlans = []
+        if not port_channel.allowed_vlan or len(port_channel.allowed_vlan) == 0:
+            # Determine allowed VLANs based on category or whether they are cross-dc
+            for vlan in self.service.vlan:
+                if port_channel.mode == "trunk":
+                    if vlan.category in port_channel.category:
+                        allowed_vlans.append(vlan.id)
+                else:
+                    if vlan.cross_dc:
+                        allowed_vlans.append(vlan.id)
+        else:
+            allowed_vlans = port_channel.allowed_vlan
+
+        for vlan in allowed_vlans:
+            allowed_vlan_vars.add("ALLOWED_VLAN", vlan)
+            self.log.info(f"Applying template port-channel-member-allowed-vlan-cfg with VLAN {vlan}")
+            allowed_vlan_templ.apply("port-channel-member-allowed-vlan-cfg", allowed_vlan_vars)
+
     def setup_port_channel_member(self, dc, switch, port_channel, intf):
         """
         Configure member interfaces in the port-channel.
@@ -483,6 +517,16 @@ class CiscoLiveServiceCreate(Service):
         member_vars.add("MODE", port_channel.mode)
         member_vars.add("PROTOCOL", port_channel.protocol)
 
+        if port_channel.mode == "trunk" or port_channel.mode == "cross-dc-link":
+            member_vars.add("MODE", "trunk")
+            member_vars.add("ACCESS_VLAN", "")
+        else:
+            member_vars.add("MODE", "access")
+            member_vars.add("ACCESS_VLAN", port_channel.vlan)
+
+        if port_channel.mode == "trunk" or port_channel.mode == "cross-dc-link":
+            self.setup_port_channel_member_allowed_vlans(dc, switch, port_channel, intf)
+
         # This will actually fail once an interface becomes "owned" by the service.
         # This will fail later on when an invalid interface is configured, so this check isn't critical.
         # if intf.name not in self.root.devices.device[switch.device].config.interface.Ethernet:
@@ -497,7 +541,7 @@ class CiscoLiveServiceCreate(Service):
         elif "ciscolive:description-list" in intf and intf.description_list:
             # The member on each switch gets its own interface.
             if len(list(intf.description_list)) == 2:
-                member_vars.add("DESCRIPTION", list(intf.description_list)[int(dc.id) - 1])
+                member_vars.add("DESCRIPTION", list(intf.description_list)[int(switch.id) - 1])
             else:
                 member_vars.add("DESCRIPTION", list(intf.description_list)[get_switch_index(dc.id, switch.id)])
         else:
