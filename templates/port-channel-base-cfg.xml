@@ -6,6 +6,9 @@
                 <interface xmlns="http://tail-f.com/ned/cisco-nx">
                     <port-channel>
                         <name>{$PC_NAME}</name>
+                        <enable>
+                            <switchport>true</switchport>
+                        </enable>
                         <switchport>
                             <mode>{$MODE}</mode>
                             <?if {$MODE = "access"}?>

@@ -6,6 +6,9 @@
                 <interface xmlns="http://tail-f.com/ned/cisco-nx">
                     <Ethernet>
                         <name>{$INTF_NAME}</name>
+                        <enable>
+                            <switchport>true</switchport>
+                        </enable>
                         <channel-group>
                             <id>{$PC_NAME}</id>
                             <?if {$PROTOCOL != "none"}?>
