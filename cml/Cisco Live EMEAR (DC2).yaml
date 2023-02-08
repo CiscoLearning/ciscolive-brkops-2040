@@ -1,0 +1,588 @@
+lab:
+  description: ''
+  notes: ''
+  title: Cisco Live EMEAR (DC2)
+  version: 0.1.0
+links:
+  - id: l0
+    n1: n1
+    n2: n0
+    i1: i1
+    i2: i0
+    label: internet-rtr-GigabitEthernet1<->Internet-port
+  - id: l1
+    n1: n1
+    n2: n2
+    i1: i2
+    i2: i8
+    label: internet-rtr-GigabitEthernet2<->dc2-ethsw-1-Ethernet1/7
+  - id: l2
+    n1: n2
+    n2: n3
+    i1: i1
+    i2: i1
+    label: dc2-ethsw-1-mgmt0<->dc2-ethsw-2-mgmt0
+  - id: l3
+    n1: n2
+    n2: n3
+    i1: i2
+    i2: i2
+    label: dc2-ethsw-1-Ethernet1/1<->dc2-ethsw-2-Ethernet1/1
+  - id: l4
+    n1: n2
+    n2: n3
+    i1: i3
+    i2: i3
+    label: dc2-ethsw-1-Ethernet1/2<->dc2-ethsw-2-Ethernet1/2
+  - id: l5
+    n1: n3
+    n2: n1
+    i1: i8
+    i2: i3
+    label: dc2-ethsw-2-Ethernet1/7<->internet-rtr-GigabitEthernet3
+  - id: l6
+    n1: n3
+    n2: n5
+    i1: i6
+    i2: i1
+    label: dc2-ethsw-2-Ethernet1/5<->vSwitch0-port1
+  - id: l7
+    n1: n4
+    n2: n5
+    i1: i0
+    i2: i0
+    label: test-host-ens2<->vSwitch0-port0
+  - id: l8
+    n1: n5
+    n2: n2
+    i1: i2
+    i2: i7
+    label: vSwitch0-port2<->dc2-ethsw-1-Ethernet1/6
+  - id: l9
+    n1: n6
+    n2: n2
+    i1: i0
+    i2: i4
+    label: To dc1-ethsw-1-port<->dc2-ethsw-1-Ethernet1/3
+  - id: l10
+    n1: n3
+    n2: n7
+    i1: i4
+    i2: i0
+    label: dc2-ethsw-2-Ethernet1/3<->To dc1-ethsw-2-port
+nodes:
+  - boot_disk_size: 0
+    configuration: bridge0
+    cpu_limit: 100
+    cpus: 0
+    data_volume: 0
+    hide_links: false
+    id: n0
+    label: Internet
+    node_definition: external_connector
+    ram: 0
+    tags: []
+    x: -350
+    y: -150
+    interfaces:
+      - id: i0
+        label: port
+        slot: 0
+        type: physical
+  - boot_disk_size: 0
+    configuration: "Building configuration...\n\nCurrent configuration : 6801 bytes\n\
+      !\n! Last configuration change at 18:32:44 UTC Thu Dec 1 2022\n!\nversion 17.3\n\
+      service timestamps debug datetime msec\nservice timestamps log datetime msec\n\
+      service call-home\nplatform qfp utilization monitor load 80\nplatform punt-keepalive\
+      \ disable-kernel-core\nplatform console serial\n!\nhostname internet-rtr\n!\n\
+      boot-start-marker\nboot-end-marker\n!\n!\nno logging console\n!\nno aaa new-model\n\
+      !\n!\n!\n!\n!\n!\n!\n!\n!\n!\nlogin on-success log\n!\n!\n!\n!\n!\n!\n!\nsubscriber\
+      \ templating\n!\n!\n!\n!\n!\n!\nmultilink bundle-name authenticated\n!\n!\n\
+      !\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\ncrypto pki trustpoint SLA-TrustPoint\n\
+      \ enrollment pkcs12\n revocation-check crl\n!\ncrypto pki trustpoint TP-self-signed-1343397295\n\
+      \ enrollment selfsigned\n subject-name cn=IOS-Self-Signed-Certificate-1343397295\n\
+      \ revocation-check none\n rsakeypair TP-self-signed-1343397295\n!\n!\ncrypto\
+      \ pki certificate chain SLA-TrustPoint\n certificate ca 01\n  30820321 30820209\
+      \ A0030201 02020101 300D0609 2A864886 F70D0101 0B050030\n  32310E30 0C060355\
+      \ 040A1305 43697363 6F312030 1E060355 04031317 43697363\n  6F204C69 63656E73\
+      \ 696E6720 526F6F74 20434130 1E170D31 33303533 30313934\n  3834375A 170D3338\
+      \ 30353330 31393438 34375A30 32310E30 0C060355 040A1305\n  43697363 6F312030\
+      \ 1E060355 04031317 43697363 6F204C69 63656E73 696E6720\n  526F6F74 20434130\
+      \ 82012230 0D06092A 864886F7 0D010101 05000382 010F0030\n  82010A02 82010100\
+      \ A6BCBD96 131E05F7 145EA72C 2CD686E6 17222EA1 F1EFF64D\n  CBB4C798 212AA147\
+      \ C655D8D7 9471380D 8711441E 1AAF071A 9CAE6388 8A38E520\n  1C394D78 462EF239\
+      \ C659F715 B98C0A59 5BBB5CBD 0CFEBEA3 700A8BF7 D8F256EE\n  4AA4E80D DB6FD1C9\
+      \ 60B1FD18 FFC69C96 6FA68957 A2617DE7 104FDC5F EA2956AC\n  7390A3EB 2B5436AD\
+      \ C847A2C5 DAB553EB 69A9A535 58E9F3E3 C0BD23CF 58BD7188\n  68E69491 20F320E7\
+      \ 948E71D7 AE3BCC84 F10684C7 4BC8E00F 539BA42B 42C68BB7\n  C7479096 B4CB2D62\
+      \ EA2F505D C7B062A4 6811D95B E8250FC4 5D5D5FB8 8F27D191\n  C55F0D76 61F9A4CD\
+      \ 3D992327 A8BB03BD 4E6D7069 7CBADF8B DF5F4368 95135E44\n  DFC7C6CF 04DD7FD1\
+      \ 02030100 01A34230 40300E06 03551D0F 0101FF04 04030201\n  06300F06 03551D13\
+      \ 0101FF04 05300301 01FF301D 0603551D 0E041604 1449DC85\n  4B3D31E5 1B3E6A17\
+      \ 606AF333 3D3B4C73 E8300D06 092A8648 86F70D01 010B0500\n  03820101 00507F24\
+      \ D3932A66 86025D9F E838AE5C 6D4DF6B0 49631C78 240DA905\n  604EDCDE FF4FED2B\
+      \ 77FC460E CD636FDB DD44681E 3A5673AB 9093D3B1 6C9E3D8B\n  D98987BF E40CBD9E\
+      \ 1AECA0C2 2189BB5C 8FA85686 CD98B646 5575B146 8DFC66A8\n  467A3DF4 4D565700\
+      \ 6ADF0F0D CF835015 3C04FF7C 21E878AC 11BA9CD2 55A9232C\n  7CA7B7E6 C1AF74F6\
+      \ 152E99B7 B1FCF9BB E973DE7F 5BDDEB86 C71E3B49 1765308B\n  5FB0DA06 B92AFE7F\
+      \ 494E8A9E 07B85737 F3A58BE1 1A48A229 C37C1E69 39F08678\n  80DDCD16 D6BACECA\
+      \ EEBC7CF9 8428787B 35202CDC 60E4616A B623CDBD 230E3AFB\n  418616A9 4093E049\
+      \ 4D10AB75 27E86F73 932E35B5 8862FDAE 0275156F 719BB2F0\n  D697DF7F 28\n  \t\
+      quit\ncrypto pki certificate chain TP-self-signed-1343397295\n certificate self-signed\
+      \ 01\n  30820330 30820218 A0030201 02020101 300D0609 2A864886 F70D0101 05050030\n\
+      \  31312F30 2D060355 04031326 494F532D 53656C66 2D536967 6E65642D 43657274\n\
+      \  69666963 6174652D 31333433 33393732 3935301E 170D3231 31323134 30343539\n\
+      \  31335A17 0D333131 32313430 34353931 335A3031 312F302D 06035504 03132649\n\
+      \  4F532D53 656C662D 5369676E 65642D43 65727469 66696361 74652D31 33343333\n\
+      \  39373239 35308201 22300D06 092A8648 86F70D01 01010500 0382010F 00308201\n\
+      \  0A028201 010086BD 8F8A0047 A847F32F CF414E8C A2FB3AFA FBED0A1B 35801550\n\
+      \  954DA8D4 306AC5D6 FF1FACB9 DBBE6A69 4D8B1EBA 17A3EAE5 77BA28F7 40A3449E\n\
+      \  1C5EA064 71742C65 ACF66959 C5DFFAD9 5A334E35 6552E09A A1D5CE1F 1F43EF33\n\
+      \  B4315CC9 9E49EEBF A93B3D46 0BFA7C5B 8DA3DDAD BD9D910B 184B770F 7CEBB695\n\
+      \  B7D08FF1 29229EAE ED45167C 5BB21593 79F2BD8A 2DA79D40 CDA18D9F 36D0C615\n\
+      \  3B17A604 5E7FE046 0F47FDD7 91D87DBA 9104F89B 2F41FDFA DF6BED9B DA8478C4\n\
+      \  BAC6E5EA DCC2A6A2 55A59597 90AA3935 E76D6FA7 A13013C1 931B34D0 99CEB1C9\n\
+      \  FEB4031C 5C170040 C9CA85FB FB110DDE CA2E1733 FF92C013 0FA7A5A5 AE0C2C0B\n\
+      \  83800A90 C8BD0203 010001A3 53305130 0F060355 1D130101 FF040530 030101FF\n\
+      \  301F0603 551D2304 18301680 148EA15E E023503F F8E7D67C 037C0C05 94611B2B\n\
+      \  F0301D06 03551D0E 04160414 8EA15EE0 23503FF8 E7D67C03 7C0C0594 611B2BF0\n\
+      \  300D0609 2A864886 F70D0101 05050003 82010100 40746BF0 0633BDE8 A08BEE99\n\
+      \  3D8E6A26 DA674213 A728C3A1 3B15F30B B96C7BCD E998FCB5 23B636EB F6B3A882\n\
+      \  3D47F69F 16FD240A 4AACBC37 84F018A1 521C3608 D0BED39A 4BD3BE02 BC235FD1\n\
+      \  7B3D4CD3 8610FE1A 2F1EA725 C4A0D749 F4927CE4 0B6BE5B2 F2E4EBA2 A24E3A05\n\
+      \  3048C9A1 D7872F75 E8FDE4D8 D1C75392 F7E9D2FE 72D6475C 1AECD9BE 31A5CC89\n\
+      \  78470377 ECF7BD19 40945AEE 1E3D2C36 531E26E4 55A4DD82 BB4BFEB5 A47F2929\n\
+      \  71AFD69F B9D2E39A 4D43D54B ED58687C E13B2C17 9F200294 F8B160F9 E9AD288F\n\
+      \  FFE66F7A 25581BEA B9FCEC34 9A7F8662 FD3934E8 2C5115F5 2788416F 5269163A\n\
+      \  D2734BF4 A3CB3AB0 7B85B13B D78358C0 9F2AE726\n  \tquit\n!\ncrypto pki certificate\
+      \ pool\n cabundle nvram:ios_core.p7b\n!\nlicense udi pid CSR1000V sn 9UURBZTTWNU\n\
+      diagnostic bootup level minimal\nmemory free low-watermark processor 71507\n\
+      !\n!\nspanning-tree extend system-id\n!\n!\nredundancy\n!\n!\n!\n!\n!\n!\ncdp\
+      \ run\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\ninterface GigabitEthernet1\n\
+      \ ip address dhcp\n ip nat outside\n negotiation auto\n no mop enabled\n no\
+      \ mop sysid\n!\ninterface GigabitEthernet2\n ip address 10.127.99.100 255.255.255.0\n\
+      \ ip nat inside\n ip ospf 1 area 0\n negotiation auto\n cdp enable\n no mop\
+      \ enabled\n no mop sysid\n!\ninterface GigabitEthernet3\n ip address 10.127.100.100\
+      \ 255.255.255.0\n ip nat inside\n ip ospf 1 area 0\n negotiation auto\n cdp\
+      \ enable\n no mop enabled\n no mop sysid\n!\ninterface GigabitEthernet4\n no\
+      \ ip address\n shutdown\n negotiation auto\n no mop enabled\n no mop sysid\n\
+      !\nrouter ospf 1\n router-id 10.127.99.100\n passive-interface default\n no\
+      \ passive-interface GigabitEthernet2\n no passive-interface GigabitEthernet3\n\
+      \ default-information originate\n!\nip forward-protocol nd\nno ip http server\n\
+      ip http secure-server\n!\nip nat inside source static tcp 10.127.0.248 22 interface\
+      \ GigabitEthernet1 20022\nip nat inside source static tcp 10.127.0.247 22 interface\
+      \ GigabitEthernet1 10022\nip nat inside source static tcp 10.127.0.247 830 interface\
+      \ GigabitEthernet1 10830\nip nat inside source list CLEUR22 interface GigabitEthernet1\
+      \ overload\n!\nip access-list standard CLEUR22\n 10 permit 10.0.0.0 0.255.255.255\n\
+      !\n!\n!\n!\n!\n!\n!\ncontrol-plane\n!\n!\n!\n!\n!\n!\nline con 0\n exec-timeout\
+      \ 0 0\n stopbits 1\nline vty 0\n login\n transport input ssh\nline vty 1\n login\n\
+      \ length 0\n transport input ssh\nline vty 2 4\n login\n transport input ssh\n\
+      !\ncall-home\n ! If contact email address in call-home is configured as sch-smart-licensing@cisco.com\n\
+      \ ! the email address configured in Cisco Smart License Portal will be used\
+      \ as contact email address to send SCH notifications.\n contact-email-addr sch-smart-licensing@cisco.com\n\
+      \ profile \"CiscoTAC-1\"\n  active\n  destination transport-method http\n!\n\
+      !\n!\n!\n!\nend"
+    cpu_limit: 100
+    cpus: 1
+    data_volume: 0
+    hide_links: false
+    id: n1
+    label: internet-rtr
+    node_definition: csr1000v
+    ram: 3072
+    tags: []
+    x: -350
+    y: -50
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: GigabitEthernet1
+        slot: 0
+        type: physical
+      - id: i2
+        label: GigabitEthernet2
+        slot: 1
+        type: physical
+      - id: i3
+        label: GigabitEthernet3
+        slot: 2
+        type: physical
+      - id: i4
+        label: GigabitEthernet4
+        slot: 3
+        type: physical
+  - boot_disk_size: 0
+    configuration: |-
+      # workaround for booting to loader> prompt
+      echo 'from cli import cli' > set_boot.py
+      echo 'import json' >> set_boot.py
+      echo 'import os' >> set_boot.py
+      echo 'import time' >> set_boot.py
+      echo 'bootimage = json.loads(cli("show version | json"))["kick_file_name"]' >> set_boot.py
+      echo 'set_boot = cli("conf t ; boot nxos {} ; no event manager applet BOOTCONFIG".format(bootimage))' >> set_boot.py
+      echo 'i = 0' >> set_boot.py
+      echo 'while i < 10:' >> set_boot.py
+      echo '    try:' >> set_boot.py
+      echo '        save_config = cli("copy running-config startup-config")' >> set_boot.py
+      echo '        break' >> set_boot.py
+      echo '    except Exception:' >> set_boot.py
+      echo '        i += 1' >> set_boot.py
+      echo '        time.sleep(1)' >> set_boot.py
+      echo 'os.remove("/bootflash/set_boot.py")' >> set_boot.py
+      event manager applet BOOTCONFIG
+       event syslog pattern "Configured from vty"
+       action 1.0 cli python bootflash:set_boot.py
+      hostname dc2-ethsw-1
+
+      feature tacacs+
+      cfs eth distribute
+      feature ospf
+      feature ospfv3
+      feature pim
+      feature interface-vlan
+      feature hsrp
+      feature lacp
+      feature dhcp
+      feature vpc
+      feature lldp
+      clock timezone CET 1 0
+      feature imp
+
+      copp profile strict
+      no password strength-check
+      username admin password cisco  role network-admin
+      ip domain-lookup
+      system default switchport
+
+      route-map StaticOSPF_RMv6 permit 10
+        match ipv6 address StaticOSPFListv6
+      route-map StaticsOSFP_RM permit 10
+        match ip address StaticOSPFList
+
+      service dhcp
+      ip dhcp relay
+      ipv6 dhcp relay
+
+      interface Ethernet1/7
+        no switchport
+        ip address 10.127.99.99/24
+        no ip ospf passive-interface
+        ip router ospf 1 area 0.0.0.0
+        no shutdown
+
+      interface loopback0
+        ip address 10.127.0.247/32
+        ipv6 address 2a05:f8c0:2:7f00::f7/128
+        ip ospf network point-to-point
+        ip router ospf 1 area 0.0.0.0
+        ospfv3 network point-to-point
+        ipv6 router ospfv3 1 area 0.0.0.0
+
+      cli alias name wr copy run start
+      line vty
+        exec-timeout 0
+        access-class MGMT in
+        ipv6 access-class MGMT_v6 in
+      router ospf 1
+        router-id 10.127.0.247
+        redistribute static route-map StaticsOSFP_RM
+        log-adjacency-changes
+        passive-interface default
+      router ospfv3 1
+        router-id 10.127.0.247
+        log-adjacency-changes
+        address-family ipv6 unicast
+          redistribute static route-map StaticOSPF_RMv6
+        passive-interface default
+      no system default switchport shutdown
+    cpu_limit: 100
+    cpus: 4
+    data_volume: 0
+    hide_links: false
+    id: n2
+    label: dc2-ethsw-1
+    node_definition: nxosv9000
+    ram: 8192
+    tags: []
+    x: -530
+    y: 100
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: mgmt0
+        slot: 0
+        type: physical
+      - id: i2
+        label: Ethernet1/1
+        slot: 1
+        type: physical
+      - id: i3
+        label: Ethernet1/2
+        slot: 2
+        type: physical
+      - id: i4
+        label: Ethernet1/3
+        slot: 3
+        type: physical
+      - id: i5
+        label: Ethernet1/4
+        slot: 4
+        type: physical
+      - id: i6
+        label: Ethernet1/5
+        slot: 5
+        type: physical
+      - id: i7
+        label: Ethernet1/6
+        slot: 6
+        type: physical
+      - id: i8
+        label: Ethernet1/7
+        slot: 7
+        type: physical
+  - boot_disk_size: 0
+    configuration: |-
+      # workaround for booting to loader> prompt
+      echo 'from cli import cli' > set_boot.py
+      echo 'import json' >> set_boot.py
+      echo 'import os' >> set_boot.py
+      echo 'import time' >> set_boot.py
+      echo 'bootimage = json.loads(cli("show version | json"))["kick_file_name"]' >> set_boot.py
+      echo 'set_boot = cli("conf t ; boot nxos {} ; no event manager applet BOOTCONFIG".format(bootimage))' >> set_boot.py
+      echo 'i = 0' >> set_boot.py
+      echo 'while i < 10:' >> set_boot.py
+      echo '    try:' >> set_boot.py
+      echo '        save_config = cli("copy running-config startup-config")' >> set_boot.py
+      echo '        break' >> set_boot.py
+      echo '    except Exception:' >> set_boot.py
+      echo '        i += 1' >> set_boot.py
+      echo '        time.sleep(1)' >> set_boot.py
+      echo 'os.remove("/bootflash/set_boot.py")' >> set_boot.py
+      event manager applet BOOTCONFIG
+       event syslog pattern "Configured from vty"
+       action 1.0 cli python bootflash:set_boot.py
+      hostname dc2-ethsw-2
+
+      feature tacacs+
+      cfs eth distribute
+      feature ospf
+      feature ospfv3
+      feature pim
+      feature interface-vlan
+      feature hsrp
+      feature lacp
+      feature dhcp
+      feature vpc
+      feature lldp
+      clock timezone CET 1 0
+      feature imp
+
+      copp profile strict
+      no password strength-check
+      username admin password cisco  role network-admin
+      ip domain-lookup
+      system default switchport
+
+      route-map StaticOSPF_RMv6 permit 10
+        match ipv6 address StaticOSPFListv6
+      route-map StaticsOSFP_RM permit 10
+        match ip address StaticOSPFList
+
+      service dhcp
+      ip dhcp relay
+      ipv6 dhcp relay
+
+      interface Ethernet1/7
+        no switchport
+        ip address 10.127.100.99/24
+        no ip ospf passive-interface
+        ip router ospf 1 area 0.0.0.0
+        no shutdown
+
+      interface loopback0
+        ip address 10.127.0.248/32
+        ipv6 address 2a05:f8c0:2:7f00::f8/128
+        ip ospf network point-to-point
+        ip router ospf 1 area 0.0.0.0
+        ospfv3 network point-to-point
+        ipv6 router ospfv3 1 area 0.0.0.0
+
+      cli alias name wr copy run start
+      line vty
+        exec-timeout 0
+        access-class MGMT in
+        ipv6 access-class MGMT_v6 in
+      router ospf 1
+        router-id 10.127.0.248
+        redistribute static route-map StaticsOSFP_RM
+        log-adjacency-changes
+        passive-interface default
+      router ospfv3 1
+        router-id 10.127.0.248
+        log-adjacency-changes
+        address-family ipv6 unicast
+          redistribute static route-map StaticOSPF_RMv6
+        passive-interface default
+      no system default switchport shutdown
+    cpu_limit: 100
+    cpus: 4
+    data_volume: 0
+    hide_links: false
+    id: n3
+    label: dc2-ethsw-2
+    node_definition: nxosv9000
+    ram: 8192
+    tags: []
+    x: -219
+    y: 100
+    interfaces:
+      - id: i0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: mgmt0
+        slot: 0
+        type: physical
+      - id: i2
+        label: Ethernet1/1
+        slot: 1
+        type: physical
+      - id: i3
+        label: Ethernet1/2
+        slot: 2
+        type: physical
+      - id: i4
+        label: Ethernet1/3
+        slot: 3
+        type: physical
+      - id: i5
+        label: Ethernet1/4
+        slot: 4
+        type: physical
+      - id: i6
+        label: Ethernet1/5
+        slot: 5
+        type: physical
+      - id: i7
+        label: Ethernet1/6
+        slot: 6
+        type: physical
+      - id: i8
+        label: Ethernet1/7
+        slot: 7
+        type: physical
+  - boot_disk_size: 64
+    configuration: |-
+      #cloud-config
+      hostname: test-host
+      manage_etc_hosts: True
+      system_info:
+        default_user:
+          name: cisco
+      password: cisco
+      chpasswd: { expire: False }
+      ssh_pwauth: True
+      ssh_authorized_keys:
+         - your-ssh-pubkey-line-goes-here
+    cpu_limit: 100
+    cpus: 1
+    data_volume: 0
+    hide_links: false
+    id: n4
+    label: test-host
+    node_definition: ubuntu
+    ram: 2048
+    tags: []
+    x: -350
+    y: 350
+    interfaces:
+      - id: i0
+        label: ens2
+        slot: 0
+        type: physical
+  - boot_disk_size: 0
+    configuration: ums-b257e0e5-f5
+    cpu_limit: 100
+    cpus: 0
+    data_volume: 0
+    hide_links: false
+    id: n5
+    label: vSwitch0
+    node_definition: unmanaged_switch
+    ram: 0
+    tags: []
+    x: -350
+    y: 200
+    interfaces:
+      - id: i0
+        label: port0
+        slot: 0
+        type: physical
+      - id: i1
+        label: port1
+        slot: 1
+        type: physical
+      - id: i2
+        label: port2
+        slot: 2
+        type: physical
+      - id: i3
+        label: port3
+        slot: 3
+        type: physical
+      - id: i4
+        label: port4
+        slot: 4
+        type: physical
+      - id: i5
+        label: port5
+        slot: 5
+        type: physical
+      - id: i6
+        label: port6
+        slot: 6
+        type: physical
+      - id: i7
+        label: port7
+        slot: 7
+        type: physical
+  - boot_disk_size: 0
+    configuration: bridge11
+    cpu_limit: 100
+    cpus: 0
+    data_volume: 0
+    hide_links: false
+    id: n6
+    label: To dc1-ethsw-1
+    node_definition: external_connector
+    ram: 0
+    tags: []
+    x: -719
+    y: 101
+    interfaces:
+      - id: i0
+        label: port
+        slot: 0
+        type: physical
+  - boot_disk_size: 0
+    configuration: bridge12
+    cpu_limit: 100
+    cpus: 0
+    data_volume: 0
+    hide_links: false
+    id: n7
+    label: To dc1-ethsw-2
+    node_definition: external_connector
+    ram: 0
+    tags: []
+    x: -17
+    y: 96
+    interfaces:
+      - id: i0
+        label: port
+        slot: 0
+        type: physical
