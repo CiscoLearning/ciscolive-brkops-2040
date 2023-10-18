@@ -2,3 +2,4 @@ Jinja2
 pyaml
 black
 flake8
+pynetbox
