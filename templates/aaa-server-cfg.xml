@@ -10,14 +10,14 @@
                             <key>0</key>
                             <shared-secret>{$KEY}</shared-secret>
                         </secret>
-                        <timeout>10</timeout>
+                        <timeout>{$TIMEOUT}</timeout>
                     </host>
                 </tacacs-server>
                 <aaa xmlns="http://tail-f.com/ned/cisco-nx">
                     <group>
                         <server>
                             <tacacs-plus>
-                                <id>AAA</id>
+                                <id>{$AAA_GROUP}</id>
                                 <server>
                                     <id>{$SERVER}</id>
                                 </server>

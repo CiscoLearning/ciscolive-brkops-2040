@@ -6,7 +6,7 @@
                 <ip xmlns="http://tail-f.com/ned/cisco-nx">
                     <access-list>
                         <list-name>
-                            <id>MGMT</id>
+                            <id>{$V4_MGMT_ACL}</id>
                             <sequence>
                                 <id>{$SEQ}</id>
                                 <action>permit</action>

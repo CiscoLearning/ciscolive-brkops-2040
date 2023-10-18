@@ -10,25 +10,25 @@
                             <address>{$EXPORTER}</address>
                         </destination>
                         <transport>
-                            <udp>9991</udp>
+                            <udp>{$EXPORTER_PORT}</udp>
                         </transport>
                         <source>{$EXPORT_INTF}</source>
                         <version>
                             <version>9</version>
                             <option>
                                 <interface-table>
-                                    <timeout>60</timeout>
+                                    <timeout>{$INTF_TIMEOUT}</timeout>
                                 </interface-table>
                             </option>
                             <template>
                                 <data>
-                                    <timeout>60</timeout>
+                                    <timeout>{$TEMPLATE_TIMEOUT}</timeout>
                                 </data>
                             </template>
                         </version>
                     </exporter>
                     <monitor>
-                        <name>CL-ipv4-nb</name>
+                        <name>{$V4_MONITOR}</name>
                         <record>
                             <record-name>CL-ipv4</record-name>
                         </record>
@@ -37,7 +37,7 @@
                         </exporter>
                     </monitor>
                     <monitor>
-                        <name>CL-ipv6-nb</name>
+                        <name>{$V6_MONITOR}</name>
                         <record>
                             <record-name>CL-ipv6</record-name>
                         </record>

@@ -41,9 +41,15 @@
               <arp>synchronize</arp>
             </ip>
             <peer-gateway/>
+            <layer3>
+              <peer-router/>
+            </layer3>
             <peer-keepalive>
               <destination>{$VPC_PEER_IP}</destination>
               <source>{$VPC_LOCAL_IP}</source>
+              <?if {$VPC_KEEP_INTF != "mgmt0"}?>
+              <vrf>default</vrf>
+              <?end?>
             </peer-keepalive>
             <?if {$SWITCH_ID = "1"}?>
             <role>
@@ -53,18 +59,7 @@
           </domain>
         </vpc>
         <interface xmlns="http://tail-f.com/ned/cisco-nx">
-          <?if {$VPC_KEEP_INTF = "mgmt0"}?>
-          <mgmt>
-            <name>0</name>
-            <shutdown tags="delete"/>
-            <description>-> vPC Keepalive {$VPC_PEER_SW}_mgmt0</description>
-            <ip>
-              <address>
-                <ipaddr>{$VPC_LOCAL_IP}/30</ipaddr>
-              </address>
-            </ip>
-          </mgmt>
-          <?else?>
+          <?if {$VPC_KEEP_INTF != "mgmt0"}?>
           <Ethernet>
             <name>{$VPC_KEEP_INTF}</name>
             <shutdown tags="delete"/>
@@ -74,13 +69,16 @@
             <description>-> vPC Keepalive {$VPC_PEER_SW}_e{$VPC_KEEP_INTF}</description>
             <ip>
               <address>
-                <ipaddr>{$VPC_LOCAL_IP}/30</ipaddr>
+                <ipaddr>{$VPC_LOCAL_IP}/24</ipaddr>
               </address>
             </ip>
           </Ethernet>
           <?end?>
           <port-channel>
             <name>{$VPC_PORT_CHANNEL}</name>
+            <enable>
+              <switchport>true</switchport>
+            </enable>
             <switchport>
               <mode>trunk</mode>
             </switchport>

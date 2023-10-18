@@ -4,8 +4,9 @@
             <name>{$DEVICE}</name>
             <config>
                 <interface xmlns="http://tail-f.com/ned/cisco-nx">
+                    <?if {$MGMT_INTF_TYPE = "loopback"}?>
                     <loopback>
-                        <name>0</name>
+                        <name>{$MGMT_INTF_ID}</name>
                         <ip>
                             <address>
                                 <ipaddr>{$V4_ADDR}</ipaddr>
@@ -34,6 +35,41 @@
                             </router>
                         </ipv6>
                     </loopback>
+                    <?else?>
+                    <Ethernet>
+                        <name>{$MGMT_INTF_ID}</name>
+                        <enable>
+                            <switchport>false</switchport>
+                        </enable>
+                        <ip>
+                            <address>
+                                <ipaddr>{$V4_ADDR}</ipaddr>
+                            </address>
+                            <ospf>
+                                <network>point-to-point</network>
+                            </ospf>
+                            <router>
+                                <ospf>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospf>
+                            </router>
+                        </ip>
+                        <ipv6>
+                            <address>
+                                <addresses>
+                                    <addr>{$V6_ADDR}</addr>
+                                </addresses>
+                            </address>
+                            <router>
+                                <ospfv3>
+                                    <name>1</name>
+                                    <area>0.0.0.0</area>
+                                </ospfv3>
+                            </router>
+                        </ipv6>
+                    </Ethernet>
+                    <?end?>
                 </interface>
             </config>
         </device>

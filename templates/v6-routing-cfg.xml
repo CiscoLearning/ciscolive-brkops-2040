@@ -7,7 +7,7 @@
                     <?if {$REDISTRIBUTE = "True"}?>
                     <access-list>
                         <list-name>
-                            <id>StaticOSPFListv6</id>
+                            <id>{$OSPF_STATIC_ACL_V6}</id>
                             <sequence>
                                 <id>{$SEQ}</id>
                                 <action>permit</action>

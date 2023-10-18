@@ -6,7 +6,7 @@
                 <ipv6 xmlns="http://tail-f.com/ned/cisco-nx">
                     <access-list>
                         <list-name>
-                            <id>MGMT_v6</id>
+                            <id>{$V6_MGMT_ACL}</id>
                             <sequence>
                                 <id>{$SEQ}</id>
                                 <action>permit</action>

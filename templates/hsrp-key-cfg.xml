@@ -5,7 +5,7 @@
             <config>
                 <key xmlns="http://tail-f.com/ned/cisco-nx">
                     <chain>
-                        <name>HSRP_KEY</name>
+                        <name>{$CHAIN_NAME}</name>
                         <key>
                             <id>1</id>
                             <key-string>

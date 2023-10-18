@@ -8,12 +8,14 @@
                         <name>{$VLAN_ID}</name>
                         <description>{$DESCRIPTION}</description>
                         <ip>
+                            <?if {$DO_NETFLOW = "true"}?>
                             <flow>
                                 <monitor>
                                     <direction>input</direction>
-                                    <name>CL-ipv4-nb</name>
+                                    <name>{$NETFLOW_V4_MONITOR}</name>
                                 </monitor>
                             </flow>
+                            <?end?>
                             <?if {$ACCESS_GROUP != ""}?>
                             <access-group>
                                 <direction>in</direction>
@@ -36,7 +38,7 @@
                                 <?if {$CATEGORY = "peer"}?>
                                 <authentication>
                                     <authentication-type>message-digest</authentication-type>
-                                    <key-chain>OSPF_KEY</key-chain>
+                                    <key-chain>{$OSPF_KEY_CHAIN}</key-chain>
                                 </authentication>
                                 <passive-interface>false</passive-interface>
                                 <?end?>
@@ -58,12 +60,14 @@
                         </ospfv3>
                         <?if {$SVI_V6 != ""}?>
                         <ipv6>
+                            <?if {$DO_NETFLOW = "true"}?>
                             <flow>
                                 <monitor>
                                     <direction>input</direction>
-                                    <name>CL-ipv6-nb</name>
+                                    <name>{$NETFLOW_V6_MONITOR}</name>
                                 </monitor>
                             </flow>
+                            <?end?>
                             <address>
                                 <addresses>
                                     <addr>{$SVI_V6}</addr>
@@ -102,7 +106,7 @@
                         <mtu>9216</mtu>
                         <?if {$BANDWIDTH != ""}?>
                         <bandwidth>
-                            <bandwidth>10000000</bandwidth>
+                            <bandwidth>{$BANDWIDTH}</bandwidth>
                         </bandwidth>
                         <?end?>
                         <!-- We don't need HSRP on peering links. -->
@@ -114,7 +118,7 @@
                                 <addr_type>ipv4</addr_type>
                                 <authentication>
                                     <md5>
-                                        <key-chain>HSRP_KEY</key-chain>
+                                        <key-chain>{$HSRP_KEY_CHAIN}</key-chain>
                                     </md5>
                                 </authentication>
                                 <ip>
@@ -133,7 +137,7 @@
                                 <addr_type>ipv6</addr_type>
                                 <authentication>
                                     <md5>
-                                        <key-chain>HSRP_KEY</key-chain>
+                                        <key-chain>{$HSRP_KEY_CHAIN}</key-chain>
                                     </md5>
                                 </authentication>
                                 <ip>

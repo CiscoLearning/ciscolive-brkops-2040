@@ -1,0 +1,62 @@
+<ciscolive xmlns="http://ciscolive.network/ciscolive">
+    <location>{$LOCATION}</location>
+    <year>{$YEAR}</year>
+    <vlan>
+        <id>{$VLAN_ID}</id>
+        <name>{$VLAN_NAME}</name>
+        <cross-dc>{$CROSS_DC}</cross-dc>
+        <native>{$NATIVE}</native>
+        <routed>{$ROUTED}</routed>
+        <category>{$CATEGORY}</category>
+        <dhcp>{$DHCP}</dhcp>
+        <netbox-id>{$NETBOX_ID}</netbox-id>
+        <?if {$ROUTED = "true"}?>
+        <?if {$CROSS_DC = "true"}?>
+        <ip>
+            <prefix>{$IPV4_PREFIX}</prefix>
+            <?if {$V4_ACL != ""}?>
+            <access-group>{$V4_ACL}</access-group>
+            <?end?>
+        </ip>
+        <ipv6>
+            <?if {$IPV6_PREFIX != ""}?>
+            <prefix>{$IPV6_PREFIX}</prefix>
+            <?else?>
+            <autogen/>
+            <?end?>
+            <?if {$V6_ACL != ""}?>
+            <traffic-filter>{$V6_ACL}</traffic-filter>
+            <?end?>
+        </ipv6>
+        <?else?>
+        <ip>
+            <data-center>
+                <id>1</id>
+                <prefix>{$DC1_IPV4_PREFIX}</prefix>
+            </data-center>
+            <data-center>
+                <id>2</id>
+                <prefix>{$DC2_IPV4_PREFIX}</prefix>
+            </data-center>
+            <?if {$V4_ACL != ""}?>
+            <access-group>{$V4_ACL}</access-group>
+            <?end?>
+        </ip>
+        <ipv6>
+            <?if {$DC1_IPV6_PREFIX != ""}?>
+            <data-center>
+                <id>1</id>
+                <prefix>{$DC1_IPV6_PREFIX}</prefix>
+            </data-center>
+            <data-center>
+                <id>2</id>
+                <prefix>{$DC2_IPV6_PREFIX}</prefix>
+            </data-center>
+            <?else?>
+            <autogen/>
+            <?end?>
+        </ipv6>
+        <?end?>
+        <?end?>
+    </vlan>
+</ciscolive>

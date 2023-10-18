@@ -10,6 +10,9 @@
                         <description>{$DESCRIPTION}</description>
                         <?end?>
                         <?if {$MODE = "access"}?>
+                        <enable>
+                            <switchport>true</switchport>
+                        </enable>
                         <switchport>
                             <mode>access</mode>
                             <access>
@@ -36,7 +39,7 @@
                             <ospf>
                                 <authentication>
                                     <authentication-type>message-digest</authentication-type>
-                                    <key-chain>OSPF_KEY</key-chain>
+                                    <key-chain>{$OSPF_KEY_CHAIN}</key-chain>
                                 </authentication>
                                 <network>point-to-point</network>
                             </ospf>
@@ -71,7 +74,7 @@
                                 </ospfv3>
                             </router>
                         </ipv6>
-                        <mtu>9000</mtu>
+                        <mtu>{$MTU}</mtu>
                         <?end?>
                     </Ethernet>
                 </interface>

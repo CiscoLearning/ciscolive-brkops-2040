@@ -1,6 +1,7 @@
 module ciscolive {
-    namespace "http://example.com/ciscolive";
+    namespace "http://ciscolive.network/ciscolive";
     prefix ciscolive;
+    yang-version 1.1;
 
     import ietf-inet-types {
         prefix inet;
@@ -142,7 +143,6 @@ module ciscolive {
 
     list ciscolive {
         tailf:info "An instance of the CiscoLive network for a given year and location.";
-        tailf:cli-full-command;
         uses ncs:service-data;
         ncs:servicepoint "ciscolive-servicepoint";
         key "location year";
@@ -165,6 +165,20 @@ module ciscolive {
             units "kbps";
             default "100000000";
         }
+        leaf tool-server {
+            tailf:info "Instance of The Tool serving this CiscoLive.";
+            type leafref {
+                path "/ciscolive:tool-server/name";
+            }
+            mandatory true;
+        }
+        leaf netbox-server {
+            tailf:info "Instance of ciscolive-netbox-server serving this CiscoLive.";
+            type leafref {
+                path "/ciscolive:netbox-server/name";
+            }
+            mandatory true;
+        }
         container management {
             tailf:info "Global management-related configuration.";
             tailf:cli-add-mode;
@@ -181,6 +195,12 @@ module ciscolive {
                     type inet:ipv6-prefix;
                     mandatory true;
                 }
+                leaf name {
+                    tailf:info "Name of the management interface.";
+                    type string;
+                    default "loopback0";
+                    config false;
+                }
             }
             leaf-list v4-network {
                 tailf:info "List of IPv4 networks used for management.";
@@ -193,6 +213,59 @@ module ciscolive {
                 tailf:cli-flat-list-syntax;
                 type inet:ipv6-prefix;
                 min-elements 1;
+            }
+        }
+        container ip-info {
+            tailf:info "Global IP data used to construct addresses.";
+            tailf:cli-add-mode;
+            leaf v4-network {
+                tailf:info "Major network to use to construct IPv4 addresses.";
+                type inet:ipv4-address;
+                default "10.0.0.0";
+            }
+            leaf vlan-octet-position {
+                tailf:info "Octet into which the VLAN ID will go (-1 for no VLAN).";
+                type union {
+                    type enumeration {
+                        enum -1;
+                    }
+                    type uint8 {
+                        range "2..3";
+                    }
+                }
+                default "2";
+            }
+            leaf dc-octet-position {
+                tailf:info "Octet into which the data center ID will go (-1 for no DC ID).";
+                type union {
+                    type enumeration {
+                        enum -1;
+                    }
+                    type uint8 {
+                        range "2..3";
+                    }
+                }
+                default "3";
+            }
+            leaf-list dc-octet {
+                tailf:info "Octets for each DC.";
+                tailf:cli-flat-list-syntax;
+                type uint8;
+                ordered-by user;
+                // XXX: There is a bug where NSO doesn't process leaf-list defaults.
+                default "253";
+                default "254";
+                max-elements 2;
+            }
+            leaf cross-dc-octet {
+                tailf:info "Octet to use for cross-DC networks.";
+                type uint8;
+                default "252";
+            }
+            leaf v6-network {
+                tailf:info "Network to use to construct IPv6 addresses.";
+                type inet:ipv6-address;
+                mandatory true;
             }
         }
         container routing {
@@ -226,9 +299,36 @@ module ciscolive {
                 }
                 uses route-common;
             }
+            container ospf {
+                tailf:info "Global OSPF parameters.";
+                leaf static-acl-v4 {
+                    tailf:info "ACL name for matching IPv4 static routes to redistribute into OSPF.";
+                    type string;
+                    default "StaticOSPFList";
+                    config false;
+                }
+                leaf static-rm-v4 {
+                    tailf:info "Route-map name for matching IPv4 static routes to redistribute into OSPF.";
+                    type string;
+                    default "StaticOSPF_RM";
+                    config false;
+                }
+                leaf static-acl-v6 {
+                    tailf:info "ACL name for matching IPv6 static routes to redistribute into OSPF.";
+                    type string;
+                    default "StaticOSPFListv6";
+                    config false;
+                }
+                leaf static-rm-v6 {
+                    tailf:info "Route-map name for matching IPv6 static routes to redistribute into OSPF.";
+                    type string;
+                    default "StaticOSPF_RMv6";
+                    config false;
+                }
+            }
         }
         container pim {
-            tailf:info "Protocol Independnent Multicast configuration.";
+            tailf:info "Protocol Independent Multicast configuration.";
             tailf:cli-add-mode;
             leaf rp {
                 tailf:info "PIM rendez-vous point.";
@@ -239,6 +339,13 @@ module ciscolive {
                 type inet:ipv4-prefix;
                 when '../rp';
                 mandatory true;
+            }
+            leaf group-range-prefix {
+                tailf:info "Group range handled by the RP.";
+                type inet:ipv4-prefix;
+                when '../rp';
+                default "224.0.0.0/4";
+                config false;
             }
         }
         container dns {
@@ -288,10 +395,22 @@ module ciscolive {
                 type tailf:aes-cfb-128-encrypted-string;
                 mandatory true;
             }
+            leaf ospf-key-chain {
+                tailf:info "Name of the OSPF keychain to use.";
+                type string;
+                default "OSPF_KEY";
+                config false;
+            }
             leaf hsrp-key {
                 tailf:info "Key to use for HSRP MD5 message digests.";
                 type tailf:aes-cfb-128-encrypted-string;
                 mandatory true;
+            }
+            leaf hsrp-key-chain {
+                tailf:info "Name of the HSRP keychain to use.";
+                type string;
+                default "HSRP_KEY";
+                config false;
             }
             list user {
                 tailf:info "List of local users.";
@@ -329,6 +448,62 @@ module ciscolive {
                     type tailf:aes-cfb-128-encrypted-string;
                     mandatory true;
                 }
+                leaf group {
+                    tailf:info "AAA group name.";
+                    type string;
+                    default "AAA";
+                    config false;
+                }
+                leaf deadtime {
+                    tailf:info "Amount of time in minutes before considering a server unresponsive.";
+                    type uint16 {
+                        range "0..1440";
+                    }
+                    default "10";
+                    units "minutes";
+                    config false;
+                }
+                leaf timeout {
+                    tailf:info "Timeout in seconds before giving up on a server.";
+                    type uint8 {
+                        range "1..60";
+                    }
+                    default "10";
+                    units "seconds";
+                    config false;
+                }
+            }
+            leaf v4-mgmt-acl {
+                tailf:info "Name of the IPv4 VTY access-list for management.";
+                type string {
+                    length "1..64";
+                }
+                default "MGMT";
+                config false;
+            }
+            leaf v6-mgmt-acl {
+                tailf:info "Name of the IPv6 VTY access-list for management.";
+                type string {
+                    length "1..64";
+                }
+                default "MGMT_v6";
+                config false;
+            }
+            leaf v4-attendee-acl {
+                tailf:info "Name of the IPv4 access-list for attendee traffic.";
+                type string {
+                    length "1..64";
+                }
+                default "IPV4-ACL-COMMON-VLAN";
+                config false;
+            }
+            leaf v6-attendee-acl {
+                tailf:info "Name of the IPv6 access-list for attendee traffic.";
+                type string {
+                    length "1..64";
+                }
+                default "IPV6-ACL-COMMON-VLAN";
+                config false;
             }
         }
         container ntp {
@@ -375,6 +550,39 @@ module ciscolive {
                 tailf:info "IP address of flow exporter server.";
                 type inet:ipv4-address;
                 mandatory true;
+            }
+            leaf exporter-port {
+                tailf:info "UDP port number on the exporter host.";
+                type uint16;
+                default "9991";
+            }
+            leaf interface-timeout {
+                tailf:info "How often to send interface statistics.";
+                type uint32 {
+                    range "0..86400";
+                }
+                default "60";
+                config false;
+            }
+            leaf template-timeout {
+                tailf:info "How often to send data flows.";
+                type uint32 {
+                    range "1..86400";
+                }
+                default "60";
+                config false;
+            }
+            leaf v4-monitor {
+                tailf:info "NetFlow IPv4 monitor name.";
+                type string;
+                default "CL-ipv4-nb";
+                config false;
+            }
+            leaf v6-monitor {
+                tailf:info "NetFlow IPv6 monitor name.";
+                type string;
+                default "CL-ipv6-nb";
+                config false;
             }
         }
         list vcenter {
@@ -428,6 +636,7 @@ module ciscolive {
                     max-elements 2;
                 }
             }
+            // In production we must have a vCenter.  However, we need to bootstrap the N9Ks first.
             // min-elements 1;
             max-elements 1;
         }
@@ -481,7 +690,14 @@ module ciscolive {
             container ip {
                 tailf:info "IPv4-related commands.";
                 tailf:cli-add-mode;
-                choice prefix-or-dc {
+                choice prefix-or-dc-or-autogen {
+                    case autogen {
+                        leaf autogen {
+                            tailf:info "IP address is to be determined automatically based on VLAN and DC.";
+                            type empty;
+                        }
+                        when '../category != "peer"';
+                    }
                     case prefix {
                         leaf prefix {
                             tailf:info "IPv4 prefix for use when the VLAN is routed and cross-dc.";
@@ -511,20 +727,40 @@ module ciscolive {
                         }
                         when '../category = "peer" or ../cross-dc = "false"';
                     }
+                    mandatory true;
                 }
-                leaf access-group {
-                    tailf:info "IPv4 access-list to apply to the VLAN SVI.";
-                    type string;
-                /*
-                 * We don't want a leafref here even if we could since ACLs will be managed by The Tool.
-                 */
+                choice attendee-acl-or-name {
+                    case name {
+                        leaf access-group {
+                            tailf:info "IPv4 access-list to apply to the VLAN SVI.";
+                            type string {
+                                length "1..64";
+                            }
+                        /*
+                        * We don't want a leafref here even if we could since ACLs will be managed by The Tool.
+                        */
+                        }
+                    }
+                    case attendee-acl {
+                        leaf attendee-access-group {
+                            tailf:info "Use standard IPv4 access-list for attendees.";
+                            type empty;
+                        }
+                    }
                 }
                 when '../routed = "true"';
             }
             container ipv6 {
                 tailf:info "IPv6-related commands.";
                 tailf:cli-add-mode;
-                choice prefix-or-dc {
+                choice prefix-or-dc-or-autogen {
+                    case autogen {
+                        leaf autogen {
+                            tailf:info "IPv6 address is to be determined automatically based on VLAN and DC.";
+                            type empty;
+                        }
+                        when '../category != "peer"';
+                    }
                     case prefix {
                         leaf prefix {
                             tailf:info "IPv6 prefix for use when the VLAN is routed and cross-dc.";
@@ -553,17 +789,33 @@ module ciscolive {
                         when '../category = "peer" or ../cross-dc = "false"';
                     }
                 }
-                leaf traffic-filter {
-                    tailf:info "IPv6 access-list to apply to the VLAN SVI.";
-                    type string;
-                    when '
-                    (
-                        (../../category != "peer" and ../../cross-dc = "true" and ../prefix != "") or
-                        ((../../category = "peer" or ../../cross-dc = "false") and count(../data-center) > 0)
-                    )';
-                /*
-                 * We don't want a leafref here even if we could since ACLs will be managed by The Tool.
-                 */
+                choice attendee-acl-or-name {
+                    case name {
+                        leaf traffic-filter {
+                            tailf:info "IPv6 access-list to apply to the VLAN SVI.";
+                            type string {
+                                length "1..64";
+                            }
+                            when '
+                            (
+                                (../../category != "peer" and ../../cross-dc = "true" and (../prefix != "" or ../autogen)) or
+                                ((../../category = "peer" or ../../cross-dc = "false") and count(../data-center) > 0)
+                            )';
+                        /*
+                         * We don't want a leafref here even if we could since ACLs will be managed by The Tool.
+                         */
+                        }
+                    }
+                    case attendee-acl {
+                        leaf attendee-traffic-filter {
+                            tailf:info "Use the standard IPv6 access-list for attendees.";
+                            type empty;
+                        when '
+                            (
+                                (../../category != "peer" and ../../cross-dc = "true" and (../prefix != "" or ../autogen))
+                            )';
+                        }
+                    }
                 }
                 leaf link-local-only {
                     tailf:info "Use link-local addresses only on this SVI.";
@@ -572,7 +824,7 @@ module ciscolive {
                     default "true";
                     when '
                     (
-                        (../../category != "peer" and ../../cross-dc = "true" and ../prefix = "") or
+                        (../../category != "peer" and ../../cross-dc = "true" and ../prefix = "" and not(../autogen)) or
                         ((../../category = "peer" or ../../cross-dc = "false") and count(../data-center) = 0)
                     )';
                 }
@@ -586,6 +838,10 @@ module ciscolive {
                     error-message
                       "Invalid number of prefix elements (cross-dc can have at most one, non-cross-dc needs 0 or 2).";
                 }
+            }
+            leaf netbox-id {
+                tailf:info "Netbox ID of this VLAN element.";
+                type uint64;
             }
         }
         container vpc-peer {
@@ -658,6 +914,7 @@ module ciscolive {
                         }
                     }
                 }
+                uses interface-details;
                 container ip {
                     tailf:info "IPv4 commands for edge interfaces.";
                     leaf-list address {
@@ -672,7 +929,7 @@ module ciscolive {
                 container ipv6 {
                     tailf:info "IPv6 related commands for edge interfaces.";
                     leaf-list address {
-                        tailf:info "IPv6 adress for interface on each switch (used with /127).  Link locals are used if omitted.";
+                        tailf:info "IPv6 address for interface on each switch (used with /127).  Link locals are used if omitted.";
                         ordered-by user;
                         type inet:ipv6-address;
                         max-elements 4;
@@ -683,7 +940,14 @@ module ciscolive {
                         }
                     }
                 }
-                uses interface-details;
+                leaf mtu {
+                    tailf:info "MTU override for this edge interface.";
+                    type uint16 {
+                        range "1500..9216";
+                    }
+                    default "9000";
+                    when '../mode = "edge"';
+                }
                 must 'mode = "access" or mode = "edge"' {
                     error-message
                       "Ethernet interfaces can only be access or edge ports.";
@@ -769,7 +1033,7 @@ module ciscolive {
                     }
                 }
                 leaf keepalive-ip {
-                    tailf:info "IP address of the vPC keepalive IP (used with a /30).";
+                    tailf:info "IP address of the vPC keepalive IP.";
                     type inet:ipv4-address;
                     mandatory true;
                 }
@@ -863,5 +1127,185 @@ module ciscolive {
             min-elements 2;
             max-elements 2;
         }
+        action sync-vlans {
+            tailf:actionpoint netbox-sync-vlans;
+            tailf:info "Sync VLANs from NetBox into this CiscoLive instance.";
+            input {
+                leaf commit {
+                    tailf:info "Whether to commit (merge and delete) changes into NSO.";
+                    type boolean;
+                    default false;
+                }
+            }
+            output {
+                leaf output {
+                    type string;
+                }
+                leaf success {
+                    type boolean;
+                }
+            }
+        }
+        action sync-acls {
+            tailf:actionpoint tool-sync-acls;
+            tailf:info "Sync ACL config elements from the Tool into this CiscoLive instance.";
+            input {
+                leaf commit {
+                    tailf:info "Whether to commit (merge) changes into NSO.";
+                    type boolean;
+                    default false;
+                }
+            }
+            output {
+                leaf output {
+                    type string;
+                }
+                leaf success {
+                    type boolean;
+                }
+            }
+        }
+    }
+
+    list tool-server {
+        description "Tool server instance.";
+        key name;
+        leaf name {
+            tailf:info "Friendly name for Tool server.";
+            type string;
+        }
+        choice server-address {
+            case dns {
+                leaf fqdn {
+                    tailf:info "DNS Name for Tool server"; 
+                    type inet:domain-name;
+                }
+            }
+            case ip {
+                leaf address { 
+                    tailf:info "IP address for Tool server";
+                    type inet:ipv4-address;
+                }
+            }
+        }
+        leaf url { 
+            tailf:info "Crafted URL for Tool server.";
+            type string; 
+            config false;
+            tailf:cdb-oper { 
+                tailf:persistent true;
+            }
+        }
+        leaf port { 
+            tailf:info "TCP Port Tool server listening on.";
+            type uint16;
+            default 443;
+        }
+        leaf protocol { 
+            tailf:info "HTTP or HTTPS used to connect to The Tool."; 
+            type enumeration { 
+                enum http;
+                enum https;
+            }
+            default https;
+        }
+        leaf username {
+            tailf:info "Username to use for The Tool.";
+            type string;
+        }
+        leaf password { 
+            tailf:info "Password to use for The Tool.";
+            type tailf:aes-cfb-128-encrypted-string;
+        }
+        leaf login-uri {
+            tailf:info "URI path to login to the Tool.";
+            type string;
+            default "/Login.aspx";
+            config false;
+        }
+        leaf api-endpoint {
+            tailf:info "URI path to the API for fetching config elements.";
+            type string;
+            default "/n/api/v1/config_element/get/json/for_name/";
+            config false;
+        }
+        action verify-status {
+            tailf:actionpoint tool-verify-status;
+            tailf:info "Perform a status check that the Tool server is reachable.";
+            output {
+                leaf output { 
+                    type string;
+                }
+                leaf success { 
+                    type boolean;
+                }
+            }
+        }
+        uses ncs:service-data;
+        ncs:servicepoint ciscolive-tool-server-servicepoint;
+
+    }
+
+    list netbox-server {
+        description "NetBox server instance.";
+        key name;
+        leaf name {
+            tailf:info "Friendly name for NetBox server.";
+            type string;
+        }
+        choice server-address {
+            case dns {
+                leaf fqdn {
+                    tailf:info "DNS Name for NetBox server"; 
+                    type inet:domain-name;
+                }
+            }
+            case ip {
+                leaf address { 
+                    tailf:info "IP address for NetBox server";
+                    type inet:ipv4-address;
+                }
+            }
+        }
+        leaf url { 
+            tailf:info "Crafted URL for NetBox server.";
+            type string; 
+            config false;
+            tailf:cdb-oper { 
+                tailf:persistent true;
+            }
+        }
+        leaf port { 
+            tailf:info "TCP Port NetBox server listening on.";
+            type uint16;
+            default 443;
+        }
+        leaf protocol { 
+            tailf:info "HTTP or HTTPS used to connect to NetBox."; 
+            type enumeration { 
+                enum http;
+                enum https;
+            }
+            default https;
+        }
+        leaf api-token { 
+            tailf:info "API Token for interacting with NetBox Server.";
+            type tailf:aes-cfb-128-encrypted-string;
+        } 
+        action verify-status {
+            tailf:actionpoint netbox-verify-status;
+            tailf:info "Perform a status check that the NetBox server is reachable.";
+            output {
+                leaf output { 
+                    type string;
+                }
+                leaf success { 
+                    type boolean;
+                }
+            }
+        }
+        uses ncs:service-data;
+        ncs:servicepoint ciscolive-netbox-server-servicepoint;
+
     }
 }

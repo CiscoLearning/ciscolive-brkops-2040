@@ -1,0 +1,7 @@
+<ciscolive xmlns="http://ciscolive.network/ciscolive">
+    <location>{$LOCATION}</location>
+    <year>{$YEAR}</year>
+    <vlan tags="delete">
+        <id>{$VLAN_ID}</id>
+    </vlan>
+</ciscolive>

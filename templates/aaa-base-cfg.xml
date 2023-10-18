@@ -7,9 +7,9 @@
                     <group>
                         <server>
                             <tacacs-plus>
-                                <id>AAA</id>
+                                <id>{$AAA_GROUP}</id>
                                 <source-interface>{$MGMT_INTF}</source-interface>
-                                <deadtime>10</deadtime>
+                                <deadtime>{$DEADTIME}</deadtime>
                             </tacacs-plus>
                         </server>
                     </group>
@@ -19,7 +19,7 @@
                                 <fallback>local</fallback>
                             </console>
                             <default>
-                                <group>AAA</group>
+                                <group>{$AAA_GROUP}</group>
                                 <fallback>local</fallback>
                             </default>
                         </login>
