@@ -27,7 +27,7 @@ class CiscoLiveToolServerAction(Action):
                 service.url + service.login_uri,
                 request={"return_url": "/", "username": service.username, "password": decrypt(service.password)},
                 timeout=10,
-                verify=False,  # TODO: Remove this when the certificate has been renewned.
+                verify=False,  # TODO: Remove this when the certificate has been renewed.
             )
         except Exception as e:
             action_output.success = False
@@ -74,9 +74,8 @@ class CiscoLiveToolAclAction(Action):
 
             m = re.search(r"(\{[^}]+})", line)
             if m and m.group(1) != "{Device.LOC_NR}":
-                acl_lines.append(f"! Skipping {line}")
-                self.log.warning(f"Skipping line {line} as it has unknown macro {m.group(1)}")
-                continue
+                self.log.warning(f"Skipping line '{line}' as it has unknown macro {m.group(1)}")
+                line = f" remark Skipping {line.lstrip()}"
 
             # Remove the "extended" keyword, not used in NX-OS.
             m = re.search(r"^ip access-list extended (.+)$", line)
@@ -106,12 +105,12 @@ class CiscoLiveToolAclAction(Action):
 
         session = None
 
-        if False:
+        if True:
             try:
                 session, _ = form_login(
                     tool_server.url + tool_server.login_uri,
                     request={"return_url": "/", "username": tool_server.username, "password": decrypt(tool_server.password)},
-                    verify=False,  # TODO: Remove this when the certificate has been renewned.
+                    verify=False,  # TODO: Remove this when the certificate has been renewed.
                 )
             except Exception as e:
                 action_output.success = False
@@ -122,7 +121,7 @@ class CiscoLiveToolAclAction(Action):
         acl_config = ""
 
         for acl in (service.security.v4_attendee_acl, service.security.v6_attendee_acl):
-            if False:
+            if True:
                 try:
                     response = session.get(tool_api + acl, verify=False)
                     response.raise_for_status()

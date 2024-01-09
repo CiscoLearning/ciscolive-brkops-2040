@@ -4,11 +4,17 @@
     <vlan>
         <id>{$VLAN_ID}</id>
         <name>{$VLAN_NAME}</name>
+        <?if {$CATEGORY != "peer"}?>
         <cross-dc>{$CROSS_DC}</cross-dc>
+        <?end?>
         <native>{$NATIVE}</native>
         <routed>{$ROUTED}</routed>
         <category>{$CATEGORY}</category>
+        <?if {$CATEGORY != "peer"}?>
+        <?if {$ROUTED = "true"}?>
         <dhcp>{$DHCP}</dhcp>
+        <?end?>
+        <?end?>
         <netbox-id>{$NETBOX_ID}</netbox-id>
         <?if {$ROUTED = "true"}?>
         <?if {$CROSS_DC = "true"}?>
@@ -21,6 +27,8 @@
         <ipv6>
             <?if {$IPV6_PREFIX != ""}?>
             <prefix>{$IPV6_PREFIX}</prefix>
+            <?elif {$IPV6_LINK_LOCAL_ONLY = "true"}?>
+            <link-local-only>true</link-local-only>
             <?else?>
             <autogen/>
             <?end?>
@@ -52,10 +60,20 @@
                 <id>2</id>
                 <prefix>{$DC2_IPV6_PREFIX}</prefix>
             </data-center>
+            <?elif {$IPV6_LINK_LOCAL_ONLY = "true"}?>
+            <link-local-only>true</link-local-only>
             <?else?>
             <autogen/>
             <?end?>
+            <?if {$V6_ACL != ""}?>
+            <traffic-filter>{$V6_ACL}</traffic-filter>
+            <?end?>
         </ipv6>
+        <?end?>
+        <?if {$OSPF = "true"}?>
+        <ospf>
+            <network>{$OSPF_NETWORK}</network>
+        </ospf>
         <?end?>
         <?end?>
     </vlan>

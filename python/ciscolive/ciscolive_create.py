@@ -25,6 +25,8 @@ class CiscoLiveServiceCreate(Service):
                 self.setup_dc_switch(dc, switch)
                 self.setup_dns(dc, switch)
                 self.setup_ospf(dc, switch)
+                if service.routing.bgp.local_as and service.routing.bgp.local_as != "":
+                    self.setup_bgp(dc, switch)
                 self.setup_mgmt_intf(dc, switch)
                 self.setup_static_routing(dc, switch)
                 self.setup_mgmt_acl(dc, switch)
@@ -337,8 +339,16 @@ class CiscoLiveServiceCreate(Service):
 
             if vlan.category == "peer":
                 svi_vars.add("BANDWIDTH", self.service.bandwidth)
+                svi_vars.add("DO_OSPF", "False")
+                svi_vars.add("OSPF_NETWORK", "")
             else:
                 svi_vars.add("BANDWIDTH", "")
+                if vlan.ospf:
+                    svi_vars.add("DO_OSPF", "True")
+                    svi_vars.add("OSPF_NETWORK", vlan.ospf.network)
+                else:
+                    svi_vars.add("DO_OSPF", "False")
+                    svi_vars.add("OSPF_NETWORK", "")
 
             if "Virtual" in str(self.root.devices.device[switch.device].source.context):
                 svi_vars.add("DO_NETFLOW", "false")
@@ -642,7 +652,11 @@ class CiscoLiveServiceCreate(Service):
                 ethernet_vars.add("MTU", intf.mtu)
                 ethernet_vars.add("OSPF_KEY_CHAIN", self.service.security.ospf_key_chain)
 
-                ethernet_vars.add("V4_ADDRESS", list(intf.ip.address)[sindex])
+                if intf.ip.address and len(list(intf.ip.address)) > 0:
+                    ethernet_vars.add("V4_ADDRESS", list(intf.ip.address)[sindex])
+                else:
+                    ethernet_vars.add("V4_ADDRESS", "")
+
                 if intf.ipv6.address and len(list(intf.ipv6.address)) > 0:
                     ethernet_vars.add("V6_ADDRESS", list(intf.ipv6.address)[sindex])
                 else:
@@ -801,6 +815,8 @@ class CiscoLiveServiceCreate(Service):
         snmp_vars.add("USER", self.service.snmp.user)
         snmp_vars.add("PASSWORD", decrypt(self.service.snmp.password))
         snmp_vars.add("MGMT_INTF", self.service.management.interface.name)
+        snmp_vars.add("MGMT_ACL", self.service.security.v4_mgmt_acl)
+        snmp_vars.add("MGMTv6_ACL", self.service.security.v6_mgmt_acl)
 
         if self.service.snmp.community and self.service.snmp.community != "":
             snmp_vars.add("COMMUNITY", decrypt(self.service.snmp.community))
@@ -888,13 +904,23 @@ class CiscoLiveServiceCreate(Service):
         ospf_templ = ncs.template.Template(self.service)
 
         ospf_vars.add("DEVICE", switch.device)
-        ospf_vars.add("BANDWIDTH", int(self.service.bandwidth / (1000 * 1000)))
+        if self.service.routing.ospf.reference_bandwidth and self.service.routing.ospf.reference_bandwidth != "":
+            ospf_vars.add("BANDWIDTH", int(self.service.routing.ospf.reference_bandwidth))
+        else:
+            ospf_vars.add("BANDWIDTH", int(self.service.bandwidth / (1000 * 1000)))
+
         ospf_vars.add("KEY", decrypt(self.service.security.ospf_key))
         ospf_vars.add("KEY_CHAIN", self.service.security.ospf_key_chain)
         ospf_vars.add("STATIC_ACL_V4", self.service.routing.ospf.static_acl_v4)
         ospf_vars.add("STATIC_RM_V4", self.service.routing.ospf.static_rm_v4)
         ospf_vars.add("STATIC_ACL_V6", self.service.routing.ospf.static_acl_v6)
         ospf_vars.add("STATIC_RM_V6", self.service.routing.ospf.static_rm_v6)
+        if "ciscolive:local_as" not in self.service.routing.bgp or not self.service.routing.bgp.local_as:
+            ospf_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
+            ospf_vars.add("BGP_RM", self.service.routing.bgp.route_map)
+        else:
+            ospf_vars.add("LOCAL_AS", "")
+            ospf_vars.add("BGP_RM", "")
 
         v4_subnet = ipaddress.ip_network(self.service.management.interface.v4_subnet)
         v4_addr = list(v4_subnet.hosts())[0]
@@ -904,6 +930,55 @@ class CiscoLiveServiceCreate(Service):
 
         self.log.info(f"Applying template ospf-base-cfg with vars {dict(ospf_vars)}")
         ospf_templ.apply("ospf-base-cfg", ospf_vars)
+
+    def setup_bgp(self, dc, switch):
+        """
+        Configure BGP parameters on a switch.
+        """
+
+        self.log.info(f"Calling setup_bgp for DC {dc.id} with switch ID {switch.id}, name {switch.device}")
+
+        bgp_vars = ncs.template.Variables()
+        bgp_templ = ncs.template.Template(self.service)
+
+        bgp_vars.add("DEVICE", switch.device)
+        bgp_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
+
+        v4_subnet = ipaddress.ip_network(self.service.management.interface.v4_subnet)
+        v4_addr = list(v4_subnet.hosts())[0]
+
+        v4_addr += get_switch_octet(dc.id, switch.id)
+        bgp_vars.add("ROUTER_ID", v4_addr)
+
+        self.log.info(f"Applying template bgp-base-cfg with vars {dict(bgp_vars)}")
+        bgp_templ.apply("bgp-base-cfg", bgp_vars)
+
+        seq = 10
+        for neighbor in self.service.routing.bgp.neighbor:
+            self.setup_bgp_peer(dc, switch, neighbor, seq)
+            seq += 10
+
+    def setup_bgp_peer(self, dc, switch, neighbor, seq):
+        """
+        Configure a BGP peer.
+        """
+
+        self.log.info(
+            f"Calling setup_bgp_peer for DC {dc.id} with switch ID {switch.id}, name {switch.device}, neighbor {neighbor.address}"
+        )
+
+        bgp_peer_vars = ncs.template.Variables()
+        bgp_peer_templ = ncs.template.Template(self.service)
+
+        bgp_peer_vars.add("DEVICE", switch.device)
+        bgp_peer_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
+        bgp_peer_vars.add("ADDRESS", neighbor.address)
+        bgp_peer_vars.add("REMOTE_AS", neighbor.remote_as)
+        bgp_peer_vars.add("BGP_RM", self.service.routing.bgp.route_map)
+        bgp_peer_vars.add("SEQ", seq)
+
+        self.log.info(f"Applying template bgp-peer-cfg with vars {dict(bgp_peer_vars)}")
+        bgp_peer_templ.apply("bgp-peer-cfg", bgp_peer_vars)
 
     def setup_dns(self, dc, device):
         """

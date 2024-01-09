@@ -54,6 +54,14 @@
                                 <route-map>{$STATIC_RM_V4}</route-map>
                             </static>
                         </redistribute>
+                        <?if {$LOCAL_AS != ""}?>
+                        <redistribute>
+                            <bgp>
+                                <as-number>{$LOCAL_AS}</as-number>
+                                <route-map>{$BGP_RM}</route-map>
+                            </bgp>
+                        </redistribute>
+                        <?end?>
                     </ospf>
                     <ospfv3>
                         <tag>1</tag>
@@ -73,6 +81,14 @@
                                             <route-map>{$STATIC_RM_V6}</route-map>
                                         </static>
                                     </redistribute>
+                                    <?if {$LOCAL_AS != ""}?>
+                                    <redistribute>
+                                        <bgp>
+                                            <as-number>{$LOCAL_AS}</as-number>
+                                            <route-map>{$BGP_RM}</route-map>
+                                        </bgp>
+                                    </redistribute>
+                                    <?end?>
                                 </unicast>
                             </ipv6>
                         </address-family>

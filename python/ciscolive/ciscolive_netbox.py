@@ -58,8 +58,11 @@ class CiscoLiveNetboxVlanAction(Action):
         for nbv in nb_vlans:
             vid = nbv.vid
             routed = nbv.prefix_count > 0
-            # XXX: Should this be metadata in NetBox?
-            dhcp = False
+            v6_link_local_only = nbv.custom_fields["v6uselinklocal"]
+            ospf = nbv.custom_fields["ospf"]
+            routed |= v6_link_local_only
+            routed &= nbv.custom_fields["routed"]
+            dhcp = nbv.custom_fields["dhcp"]
             category = nbv.custom_fields["category"]
             cross_dc = nbv.group.name == CROSS_DC_VLAN_GROUP
             ipv4_acl = ""
@@ -85,9 +88,12 @@ class CiscoLiveNetboxVlanAction(Action):
                     "name": nbv.name,
                     "routed": routed,
                     "dhcp": dhcp,
+                    "ospf": ospf,
+                    "ospf-network": nbv.custom_fields["ospfnetwork"],
                     "category": category,
                     "cross-dc": cross_dc,
                     "native": native,
+                    "v6-link-local-only": v6_link_local_only,
                     "prefixes": [],
                     "ipv4-acl": ipv4_acl,
                     "ipv6-acl": ipv6_acl,
@@ -95,6 +101,14 @@ class CiscoLiveNetboxVlanAction(Action):
 
             if routed:
                 prefixes = list(nb.ipam.prefixes.filter(vlan_id=nbv.id))
+                # Check that we don't have any IPv6 prefixes if we want to use link-local-only.
+                if v6_link_local_only:
+                    for prefix in prefixes:
+                        if prefix.family.value == 6:
+                            raise ValueError(
+                                f"VLAN {vid} ({nbv.name}): Use of IPv6 link-local-only requested and an explicit IPv6 prefix is assigned."
+                            )
+
                 # This seems a bit weird.  Prefixes will always be either a
                 # 1, 2 or 4 element list.  When dealing with DC2, make sure its
                 # prefixes are at the end of the list.
@@ -189,6 +203,9 @@ class CiscoLiveNetboxVlanAction(Action):
                         vars.add("DHCP", vlan["dhcp"])
                         vars.add("CATEGORY", vlan["category"])
                         vars.add("NETBOX_ID", vlan["id"])
+                        vars.add("IPV6_LINK_LOCAL_ONLY", vlan["v6-link-local-only"])
+                        vars.add("OSPF", vlan["ospf"])
+                        vars.add("OSPF_NETWORK", vlan["ospf-network"])
 
                         if vlan["routed"]:
                             if vlan["cross-dc"]:

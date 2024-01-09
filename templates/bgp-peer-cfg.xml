@@ -1,0 +1,37 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <router xmlns="http://tail-f.com/ned/cisco-nx">
+                    <bgp>
+                        <id>{$LOCAL_AS}</id>
+                        <neighbor>
+                            <id>{$ADDRESS}</id>
+                            <inner-remote-as>
+                                <remote-as>{$REMOTE_AS}</remote-as>
+                            </inner-remote-as>
+                            <address-family>
+                                <proto>ipv4</proto>
+                                <type>unicast</type>
+                            </address-family>
+                            <address-family>
+                                <proto>ipv6</proto>
+                                <type>unicast</type>
+                            </address-family>
+                        </neighbor>
+                    </bgp>
+                </router>
+                <route-map xmlns="http://tail-f.com/ned/cisco-nx">
+                    <name>{$BGP_RM}</name>
+                    <sequence>{$SEQ}</sequence>
+                    <match>
+                        <as-number>
+                            <as-number>{$REMOTE_AS}</as-number>
+                        </as-number>
+                    </match>
+                </route-map>
+            </config>
+        </device>
+    </devices>
+</config-template>

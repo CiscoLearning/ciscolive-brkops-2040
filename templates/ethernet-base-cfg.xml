@@ -29,19 +29,29 @@
                         <?end?>
                         <?else?>
                         <!-- This is an edge interface. -->
+                        <shutdown tags="delete"/>
                         <enable>
                             <switchport>false</switchport>
                         </enable>
                         <ip>
+                            <?if {$V4_ADDRESS != ""}?>
                             <address>
                                 <ipaddr>{$V4_ADDRESS}/31</ipaddr>
                             </address>
+                            <?else?>
+                            <addr-dhcp>
+                                <address>
+                                    <dhcp/>
+                                </address>
+                            </addr-dhcp>
+                            <?end?>
                             <ospf>
                                 <authentication>
                                     <authentication-type>message-digest</authentication-type>
                                     <key-chain>{$OSPF_KEY_CHAIN}</key-chain>
                                 </authentication>
                                 <network>point-to-point</network>
+                                <passive-interface>false</passive-interface>
                             </ospf>
                             <router>
                                 <ospf>
@@ -74,6 +84,10 @@
                                 </ospfv3>
                             </router>
                         </ipv6>
+                        <ospfv3>
+                            <passive-interface>false</passive-interface>
+                            <network>point-to-point</network>
+                        </ospfv3>
                         <mtu>{$MTU}</mtu>
                         <?end?>
                     </Ethernet>

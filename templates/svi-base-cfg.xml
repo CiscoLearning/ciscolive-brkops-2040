@@ -8,7 +8,7 @@
                         <name>{$VLAN_ID}</name>
                         <description>{$DESCRIPTION}</description>
                         <ip>
-                            <?if {$DO_NETFLOW = "true"}?>
+                            <?if {$DO_NETFLOW = "True"}?>
                             <flow>
                                 <monitor>
                                     <direction>input</direction>
@@ -41,8 +41,17 @@
                                     <key-chain>{$OSPF_KEY_CHAIN}</key-chain>
                                 </authentication>
                                 <passive-interface>false</passive-interface>
-                                <?end?>
                                 <network>point-to-point</network>
+                                <?elif {$DO_OSPF = "True"}?>
+                                <authentication>
+                                    <authentication-type>message-digest</authentication-type>
+                                    <key-chain>{$OSPF_KEY_CHAIN}</key-chain>
+                                </authentication>
+                                <passive-interface>false</passive-interface>
+                                <network>{$OSPF_NETWORK}</network>
+                                <?else?>
+                                <network>point-to-point</network>
+                                <?end?>
                             </ospf>
                             <redirects>false</redirects>
                             <router>
@@ -53,14 +62,19 @@
                             </router>
                         </ip>
                         <ospfv3>
-                            <network>point-to-point</network>
                             <?if {$CATEGORY = "peer"}?>
                             <passive-interface>false</passive-interface>
+                            <network>point-to-point</network>
+                            <?elif {$DO_OSPF = "True"}?>
+                            <passive-interface>false</passive-interface>
+                            <network>broadcast</network>
+                            <?else?>
+                            <network>point-to-point</network>
                             <?end?>
                         </ospfv3>
                         <?if {$SVI_V6 != ""}?>
                         <ipv6>
-                            <?if {$DO_NETFLOW = "true"}?>
+                            <?if {$DO_NETFLOW = "True"}?>
                             <flow>
                                 <monitor>
                                     <direction>input</direction>

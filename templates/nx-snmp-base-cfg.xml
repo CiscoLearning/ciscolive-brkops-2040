@@ -5,6 +5,7 @@
             <config>
                 <snmp-server xmlns="http://tail-f.com/ned/cisco-nx">
                     <contact>{$CONTACT}</contact>
+                    <?if {$COMMUNITY != ""}?>
                     <community>
                         <snmp-community-string>{$COMMUNITY}</snmp-community-string>
                         <group>network-operator</group>
@@ -12,10 +13,11 @@
                     <community-config>
                         <community>
                             <snmp-community-string>{$COMMUNITY}</snmp-community-string>
-                            <use-ipv4acl>MGMT</use-ipv4acl>
-                            <use-ipv6acl>MGMT_v6</use-ipv6acl>
+                            <use-ipv4acl>{$MGMT_ACL}</use-ipv4acl>
+                            <use-ipv6acl>{$MGMTv6_ACL}</use-ipv6acl>
                         </community>
                     </community-config>
+                    <?end?>
                     <location>{$LOCATION}</location>
                     <source-interface>
                         <informs>{$MGMT_INTF}</informs>
@@ -33,8 +35,8 @@
                     <user-config>
                         <user>
                             <name>{$USER}</name>
-                            <use-ipv4acl>MGMT</use-ipv4acl>
-                            <use-ipv6acl>MGMT_v6</use-ipv6acl>
+                            <use-ipv4acl>{$MGMT_ACL}</use-ipv4acl>
+                            <use-ipv6acl>{$MGMTv6_ACL}</use-ipv6acl>
                         </user>
                     </user-config>
                     <globalEnforcePriv/>
