@@ -351,11 +351,11 @@ class CiscoLiveServiceCreate(Service):
                     svi_vars.add("OSPF_NETWORK", "")
 
             if "Virtual" in str(self.root.devices.device[switch.device].source.context):
-                svi_vars.add("DO_NETFLOW", "false")
+                svi_vars.add("DO_NETFLOW", "False")
                 svi_vars.add("NETFLOW_V4_MONITOR", "")
                 svi_vars.add("NETFLOW_V6_MONITOR", "")
             else:
-                svi_vars.add("DO_NETFLOW", "true")
+                svi_vars.add("DO_NETFLOW", "True")
                 svi_vars.add("NETFLOW_V4_MONITOR", self.service.netflow.v4_monitor)
                 svi_vars.add("NETFLOW_V6_MONITOR", self.service.netflow.v6_monitor)
 
