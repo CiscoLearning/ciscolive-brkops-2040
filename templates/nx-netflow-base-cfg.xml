@@ -7,28 +7,28 @@
                     <exporter>
                         <name>CL-replicator-v9</name>
                         <destination>
-                            <address>{$EXPORTER}</address>
+                            <address>{/netflow/exporter}</address>
                         </destination>
                         <transport>
-                            <udp>{$EXPORTER_PORT}</udp>
+                            <udp>{/netflow/exporter-port}</udp>
                         </transport>
-                        <source>{$EXPORT_INTF}</source>
+                        <source>{/management/interface/name}</source>
                         <version>
                             <version>9</version>
                             <option>
                                 <interface-table>
-                                    <timeout>{$INTF_TIMEOUT}</timeout>
+                                    <timeout>{/netflow/interface-timeout}</timeout>
                                 </interface-table>
                             </option>
                             <template>
                                 <data>
-                                    <timeout>{$TEMPLATE_TIMEOUT}</timeout>
+                                    <timeout>{/netflow/template-timeout}</timeout>
                                 </data>
                             </template>
                         </version>
                     </exporter>
                     <monitor>
-                        <name>{$V4_MONITOR}</name>
+                        <name>{/netflow/v4-monitor}</name>
                         <record>
                             <record-name>CL-ipv4</record-name>
                         </record>
@@ -37,7 +37,7 @@
                         </exporter>
                     </monitor>
                     <monitor>
-                        <name>{$V6_MONITOR}</name>
+                        <name>{/netflow/v6-monitor}</name>
                         <record>
                             <record-name>CL-ipv6</record-name>
                         </record>

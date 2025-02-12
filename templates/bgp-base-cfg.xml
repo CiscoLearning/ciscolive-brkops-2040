@@ -5,7 +5,7 @@
             <config>
                 <router xmlns="http://tail-f.com/ned/cisco-nx">
                     <bgp>
-                        <id>{$LOCAL_AS}</id>
+                        <id>{/routing/bgp/local-as}</id>
                         <router-id>{$ROUTER_ID}</router-id>
                     </bgp>
                 </router>

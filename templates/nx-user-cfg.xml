@@ -9,13 +9,14 @@
                         <encryption>0</encryption>
                         <password>{$USER_PASSWORD}</password>
                     </password>
+                    <role>{$USER_ROLE}</role>
                 </username>
-                <username-secondary-roles xmlns="http://tail-f.com/ned/cisco-nx">
+                <!-- <username-secondary-roles xmlns="http://tail-f.com/ned/cisco-nx">
                     <username>
                         <name>{$USERNAME}</name>
                         <role>{$USER_ROLE}</role>
                     </username>
-                </username-secondary-roles>
+                </username-secondary-roles> -->
             </config>
         </device>
     </devices>

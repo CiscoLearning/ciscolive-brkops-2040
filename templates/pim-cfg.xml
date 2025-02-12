@@ -5,9 +5,9 @@
             <config>
                 <ip xmlns="http://tail-f.com/ned/cisco-nx">
                     <pim>
-                        <register-source>{$PIM_SOURCE}</register-source>
+                        <register-source>{/management/interface/name}</register-source>
                         <rp-address>
-                            <ip-address>{$RP_ADDRESS}</ip-address>
+                            <ip-address>{/pim/rp}</ip-address>
                             <group-list>
                                 <group-range-prefix>224.0.0.0/4</group-range-prefix>
                                 <override/>
@@ -15,7 +15,7 @@
                         </rp-address>
                         <ssm>
                             <range>
-                                <list-of-group>{$SSM_RANGE}</list-of-group>
+                                <list-of-group>{/pim/ssm-range}</list-of-group>
                             </range>
                         </ssm>
                     </pim>

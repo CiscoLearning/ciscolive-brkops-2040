@@ -4,7 +4,7 @@
             <name>{$DEVICE}</name>
             <config>
                 <snmp-server xmlns="http://tail-f.com/ned/cisco-nx">
-                    <contact>{$CONTACT}</contact>
+                    <contact>{/contact}</contact>
                     <?if {$COMMUNITY != ""}?>
                     <community>
                         <snmp-community-string>{$COMMUNITY}</snmp-community-string>
@@ -13,17 +13,17 @@
                     <community-config>
                         <community>
                             <snmp-community-string>{$COMMUNITY}</snmp-community-string>
-                            <use-ipv4acl>{$MGMT_ACL}</use-ipv4acl>
-                            <use-ipv6acl>{$MGMTv6_ACL}</use-ipv6acl>
+                            <use-ipv4acl>{/security/v4-mgmt-acl}</use-ipv4acl>
+                            <use-ipv6acl>{/security/v6-mgmt-acl}</use-ipv6acl>
                         </community>
                     </community-config>
                     <?end?>
                     <location>{$LOCATION}</location>
                     <source-interface>
-                        <informs>{$MGMT_INTF}</informs>
+                        <informs>{/management/interface/name}</informs>
                     </source-interface>
                     <user>
-                        <name>{$USER}</name>
+                        <name>{/snmp/user}</name>
                         <role>network-admin</role>
                         <auth>
                             <sha>{$PASSWORD}</sha>
@@ -34,9 +34,9 @@
                     </user>
                     <user-config>
                         <user>
-                            <name>{$USER}</name>
-                            <use-ipv4acl>{$MGMT_ACL}</use-ipv4acl>
-                            <use-ipv6acl>{$MGMTv6_ACL}</use-ipv6acl>
+                            <name>{/snmp/user}</name>
+                            <use-ipv4acl>{/security/v4-mgmt-acl}</use-ipv4acl>
+                            <use-ipv6acl>{/security/v6-mgmt-acl}</use-ipv6acl>
                         </user>
                     </user-config>
                     <globalEnforcePriv/>

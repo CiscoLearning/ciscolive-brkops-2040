@@ -144,7 +144,7 @@ class CiscoLiveNetboxVlanAction(Action):
             nb_ids = [nbv.id for nbv in nb_vlans]
         except Exception as e:
             action_output.success = False
-            action_output.output = f"Failed to get list of infrastructure VLANS from NetBox: {e}"
+            action_output.output = "Failed to get list of infrastructure VLANS from NetBox: %s" % str(e)
             return
 
         # Get the list of current VLANs from this instance of CiscoLive.
@@ -179,8 +179,8 @@ class CiscoLiveNetboxVlanAction(Action):
                                 # vlan_message.append(f" {clv.id} ({clv.name})")
 
                                 vars = ncs.template.Variables()
-                                vars.add("LOCATION", service.location)
-                                vars.add("YEAR", service.year)
+                                # vars.add("LOCATION", service.location)
+                                # vars.add("YEAR", service.year)
                                 vars.add("VLAN_ID", clv.id)
 
                                 self.log.info(f"Removing VLAN {clv.id} ({clv.name}) as it is no longer in NetBox.")
@@ -193,8 +193,8 @@ class CiscoLiveNetboxVlanAction(Action):
                         # vlan_message.append(json.dumps({vid: vlan}, indent=2, cls=ComplexEncoder) + ",")
 
                         vars = ncs.template.Variables()
-                        vars.add("LOCATION", service.location)
-                        vars.add("YEAR", service.year)
+                        # vars.add("LOCATION", service.location)
+                        # vars.add("YEAR", service.year)
                         vars.add("VLAN_ID", vid)
                         vars.add("VLAN_NAME", vlan["name"])
                         vars.add("ROUTED", vlan["routed"])
@@ -215,6 +215,8 @@ class CiscoLiveNetboxVlanAction(Action):
                                 vars.add("DC2_IPV6_PREFIX", "")
                                 if len(vlan["prefixes"]) == 2:
                                     # This has a custom IPv6 prefix
+                                    vars.add("IPV4_PREFIX", "")
+                                    vars.add("IPV6_PREFIX", "")
                                     for prefix in vlan["prefixes"]:
                                         if prefix.family.value == 4:
                                             vars.add("IPV4_PREFIX", prefix.prefix)

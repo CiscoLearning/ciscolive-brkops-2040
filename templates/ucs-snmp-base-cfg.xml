@@ -5,11 +5,11 @@
       <config>
         <monitoring xmlns="http://tail-f.com/ned/cisco-ucs">
           <snmp>
-            <syscontact>{$CONTACT}</syscontact>
+            <syscontact>{/contact}</syscontact>
             <syslocation>{$LOCATION}</syslocation>
           </snmp>
           <snmp-user>
-            <name>{$USER}</name>
+            <name>{/snmp/user}</name>
             <password>{$PASSWORD}</password>
             <aes-128>yes</aes-128>
             <auth>sha</auth>

@@ -5,7 +5,7 @@
             <config>
                 <router xmlns="http://tail-f.com/ned/cisco-nx">
                     <bgp>
-                        <id>{$LOCAL_AS}</id>
+                        <id>{/routing/bgp/local-as}</id>
                         <neighbor>
                             <id>{$ADDRESS}</id>
                             <inner-remote-as>
@@ -23,7 +23,7 @@
                     </bgp>
                 </router>
                 <route-map xmlns="http://tail-f.com/ned/cisco-nx">
-                    <name>{$BGP_RM}</name>
+                    <name>{/routing/bgp/route-map}</name>
                     <sequence>{$SEQ}</sequence>
                     <match>
                         <as-number>

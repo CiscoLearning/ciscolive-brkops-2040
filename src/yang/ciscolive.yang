@@ -87,7 +87,7 @@ module ciscolive {
     grouping interface-details {
         uses description-details;
         leaf mode {
-            tailf:info "Type of interface.  The 'edge' mode is considered an error for port-channels.";
+            tailf:info "Type of interface.  The 'edge' and 'monitor' modes are considered an error for port-channels.";
             type enumeration {
                 enum access {
                     tailf:info "This interface is an access port in a given VLAN.";
@@ -100,6 +100,9 @@ module ciscolive {
                 }
                 enum cross-dc-link {
                     tailf:info "This link connects DCs.";
+                }
+                enum monitor {
+                    tailf:info "This interface is a SPAN destination port.";
                 }
             }
         }
@@ -147,7 +150,7 @@ module ciscolive {
         ncs:servicepoint "ciscolive-servicepoint";
         key "location year";
         leaf location {
-            tailf:info "Location of this instance of the CiscoLive network.";
+            tailf:info "Geographic location (e.g., city) of this instance of the CiscoLive network.";
             type string;
         }
         leaf year {
@@ -355,12 +358,19 @@ module ciscolive {
                         type uint32;
                         mandatory true;
                     }
+                    leaf-list data-center {
+                        tailf:info "Data centers that are valid for the peer; default both.";
+                        type enumeration {
+                            enum 1;
+                            enum 2;
+                        }
+                    }
                     must "../local-as";
                 }
                 leaf route-map {
                     tailf:info "Route-map for redistributing BGP into OSPF.";
                     type string;
-                    default "RedistributeToBGP";
+                    default "RedistributeFromBGP";
                     config false;
                 }
             }
@@ -532,7 +542,7 @@ module ciscolive {
                 type string {
                     length "1..64";
                 }
-                default "IPV4-ACL-COMMON-VLAN";
+                default "IPV4_ACL_COMMON_VLAN";
                 config false;
             }
             leaf v6-attendee-acl {
@@ -540,7 +550,7 @@ module ciscolive {
                 type string {
                     length "1..64";
                 }
-                default "IPV6-ACL-COMMON-VLAN";
+                default "IPV6_ACL_COMMON_VLAN";
                 config false;
             }
         }
@@ -621,6 +631,31 @@ module ciscolive {
                 type string;
                 default "CL-ipv6-nb";
                 config false;
+            }
+        }
+        container monitor {
+            tailf:info "SPAN configuration.";
+            leaf id {
+                tailf:info "Id for the SPAN session (currently only one session supported).";
+                type uint8 {
+                    range "1..48";
+                }
+                config false;
+                default "1";
+            }
+            leaf shutdown {
+                tailf:info "Whether or not this session is shutdown or active.";
+                type boolean;
+                default "true";
+            }
+            leaf direction {
+                tailf:info "In which direction to capture the traffic.";
+                type enumeration {
+                    enum tx;
+                    enum rx;
+                    enum both;
+                }
+                default "both";
             }
         }
         list vcenter {
@@ -1011,9 +1046,9 @@ module ciscolive {
                     default "9000";
                     when '../mode = "edge"';
                 }
-                must 'mode = "access" or mode = "edge"' {
+                must 'mode = "access" or mode = "edge" or mode = "monitor"' {
                     error-message
-                      "Ethernet interfaces can only be access or edge ports.";
+                      "Ethernet interfaces can only be access, edge or monitor ports.";
                 }
             }
             list port-channel {
@@ -1040,6 +1075,7 @@ module ciscolive {
                 }
                 list member-interface {
                     tailf:info "Member interfaces of this port-channel.";
+                    tailf:cli-exit-command "exit-member-interface";
                     key "name";
                     leaf name {
                         type string {
@@ -1051,9 +1087,9 @@ module ciscolive {
                     min-elements 1;
                 }
                 uses interface-details;
-                must 'mode != "edge"' {
+                must 'mode != "edge" and mode != "monitor"' {
                     error-message
-                      "'edge' is an invalid mode for port-channels.";
+                      "'edge' or 'monitor' are an invalid modes for port-channels.";
                 }
             }
         }

@@ -15,7 +15,7 @@
                             <mode>trunk</mode>
                         </switchport>
                         <channel-group>
-                            <id>{$VPC_PORT_CHANNEL}</id>
+                            <id>{/vpc-peer/peer-port-channel}</id>
                             <mode>active</mode>
                         </channel-group>
                         <spanning-tree>

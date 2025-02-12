@@ -7,9 +7,9 @@
                     <group>
                         <server>
                             <tacacs-plus>
-                                <id>{$AAA_GROUP}</id>
-                                <source-interface>{$MGMT_INTF}</source-interface>
-                                <deadtime>{$DEADTIME}</deadtime>
+                                <id>{/security/aaa/group}</id>
+                                <source-interface>/{management/interface/name}</source-interface>
+                                <deadtime>{/security/aaa/deadtime}</deadtime>
                             </tacacs-plus>
                         </server>
                     </group>
@@ -19,7 +19,7 @@
                                 <fallback>local</fallback>
                             </console>
                             <default>
-                                <group>{$AAA_GROUP}</group>
+                                <group>{/security/aaa/group}</group>
                                 <fallback>local</fallback>
                             </default>
                         </login>
@@ -27,7 +27,7 @@
                 </aaa>
                 <ip xmlns="http://tail-f.com/ned/cisco-nx">
                     <tacacs>
-                        <source-interface>{$MGMT_INTF}</source-interface>
+                        <source-interface>{/management/interface/name}</source-interface>
                     </tacacs>
                 </ip>
             </config>

@@ -4,7 +4,7 @@
             <name>{$DEVICE}</name>
             <config>
                 <ip xmlns="http://tail-f.com/ned/cisco-nx">
-                    <domain-name>{$DOMAIN}</domain-name>
+                    <domain-name>{/dns/domain}</domain-name>
                 </ip>
             </config>
         </device>

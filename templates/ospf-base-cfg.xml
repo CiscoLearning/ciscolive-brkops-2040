@@ -4,30 +4,30 @@
             <name>{$DEVICE}</name>
             <config>
                 <route-map xmlns="http://tail-f.com/ned/cisco-nx">
-                    <name>{$STATIC_RM_V4}</name>
+                    <name>{/routing/ospf/static-rm-v4}</name>
                     <sequence>10</sequence>
                     <match>
                         <ip>
                             <address>
-                                <access-list>{$STATIC_ACL_V4}</access-list>
+                                <access-list>{/routing/ospf/static-acl-v4}</access-list>
                             </address>
                         </ip>
                     </match>
                 </route-map>
                 <route-map xmlns="http://tail-f.com/ned/cisco-nx">
-                    <name>{$STATIC_RM_V6}</name>
+                    <name>{/routing/ospf/static-rm-v6}</name>
                     <sequence>10</sequence>
                     <match>
                         <ipv6>
                             <address>
-                                <access-list>{$STATIC_ACL_V6}</access-list>
+                                <access-list>{/routing/ospf/static-acl-v6}</access-list>
                             </address>
                         </ipv6>
                     </match>
                 </route-map>
                 <key xmlns="http://tail-f.com/ned/cisco-nx">
                     <chain>
-                        <name>{$KEY_CHAIN}</name>
+                        <name>{/security/ospf-key-chain}</name>
                         <key>
                             <id>1</id>
                             <cryptographic-algorithm>HMAC-SHA-256</cryptographic-algorithm>
@@ -51,7 +51,7 @@
                         </auto-cost>
                         <redistribute>
                             <static>
-                                <route-map>{$STATIC_RM_V4}</route-map>
+                                <route-map>{/routing/ospf/static-rm-v4}</route-map>
                             </static>
                         </redistribute>
                         <?if {$LOCAL_AS != ""}?>
@@ -78,7 +78,7 @@
                                 <unicast>
                                     <redistribute>
                                         <static>
-                                            <route-map>{$STATIC_RM_V6}</route-map>
+                                            <route-map>{/routing/ospf/static-rm-v6}</route-map>
                                         </static>
                                     </redistribute>
                                     <?if {$LOCAL_AS != ""}?>

@@ -5,12 +5,12 @@
       <config>
         <banner xmlns="http://tail-f.com/ned/cisco-nx">
           <motd>
-            <start-marker>"</start-marker>
+            <start-marker>^C</start-marker>
             <message>
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@                 Hostname: {$DEVICE}                    @@
 @@                                                          @@
-@@                Cisco Live {$YEAR} Team                      @@
+@@                Cisco Live {/year} Team                      @@
 @@                                                          @@
 @@          UNAUTHORIZED ACCESS IS PROHIBITED               @@
 @@                                                          @@
@@ -20,7 +20,7 @@
 @@     notified to take appropriate actions.                @@
 @@                                                          @@
 @@     If you require access to this device please          @@
-@@     contact the NOC team on {$CONTACT}    @@
+@@     contact the NOC team on {/contact}    @@
 @@                                                          @@
 @@     For urgent issues contact either:                    @@
 @@       - Joe Clarke +1-919-345-5369                       @@
@@ -28,7 +28,7 @@
 @@                                                          @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             </message>
-            <end-marker>"</end-marker>
+            <end-marker>^C</end-marker>
           </motd>
         </banner>
         <vpc xmlns="http://tail-f.com/ned/cisco-nx">
@@ -47,7 +47,7 @@
             <peer-keepalive>
               <destination>{$VPC_PEER_IP}</destination>
               <source>{$VPC_LOCAL_IP}</source>
-              <?if {$VPC_KEEP_INTF != "mgmt0"}?>
+              <?if {/vpc-peer/keepalive-interface != "mgmt0"}?>
               <vrf>default</vrf>
               <?end?>
             </peer-keepalive>
@@ -59,14 +59,14 @@
           </domain>
         </vpc>
         <interface xmlns="http://tail-f.com/ned/cisco-nx">
-          <?if {$VPC_KEEP_INTF != "mgmt0"}?>
+          <?if {/vpc-peer/keepalive-interface != "mgmt0"}?>
           <Ethernet>
-            <name>{$VPC_KEEP_INTF}</name>
+            <name>{/vpc-peer/keepalive-interface}</name>
             <shutdown tags="delete"/>
             <enable>
               <switchport>false</switchport>
             </enable>
-            <description>-> vPC Keepalive {$VPC_PEER_SW}_e{$VPC_KEEP_INTF}</description>
+            <description>-> vPC Keepalive {$VPC_PEER_SW}_e{/vpc-peer/keepalive-interface}</description>
             <ip>
               <address>
                 <ipaddr>{$VPC_LOCAL_IP}/24</ipaddr>
@@ -75,7 +75,7 @@
           </Ethernet>
           <?end?>
           <port-channel>
-            <name>{$VPC_PORT_CHANNEL}</name>
+            <name>{/vpc-peer/peer-port-channel}</name>
             <enable>
               <switchport>true</switchport>
             </enable>

@@ -31,7 +31,7 @@ class CiscoLiveToolServerAction(Action):
             )
         except Exception as e:
             action_output.success = False
-            action_output.output = f"Failed to query Tool: {e}"
+            action_output.output = "Failed to query Tool: %s" % str(e)
             self.log.exception("Failed to query Tool: %s" % str(e))
         else:
             action_output.success = True
@@ -47,7 +47,7 @@ class CiscoLiveToolAclAction(Action):
     def convert_acl(self, acl_blob: str, service: Any) -> str:
         """Convert an IOS-XE ACL into NX-OS.
 
-        Additionally, any macros are substitued.
+        Additionally, any macros are substituted.
         """
         acl_lines = []
         aclno = 10
@@ -64,6 +64,8 @@ class CiscoLiveToolAclAction(Action):
                 "DNS_Server2": list(service.dns.server)[1],
                 "NTP_Server1": list(service.ntp.server)[0],
                 "NTP_Server2": list(service.ntp.server)[1],
+                "ntp1_ip": list(service.ntp.server)[0],
+                "ntp2_ip": list(service.ntp.server)[1],
                 "IPV6_PREFIX": str(service.ip_info.v6_network).rstrip(":"),
             }.items():
                 line = re.sub(rf"\{{{macro}}}", sub, line, flags=re.I)
@@ -114,20 +116,21 @@ class CiscoLiveToolAclAction(Action):
                 )
             except Exception as e:
                 action_output.success = False
-                action_output.output = f"Failed to authenticate to the Tool: {e}"
+                action_output.output = "Failed to authenticate to the Tool: %s" % str(e)
                 return
 
         dry_run = {}
         acl_config = ""
 
         for acl in (service.security.v4_attendee_acl, service.security.v6_attendee_acl):
+            # Set this to "if False" if testing with static JSON.
             if True:
                 try:
                     response = session.get(tool_api + acl, verify=False)
                     response.raise_for_status()
                 except Exception as e:
                     action_output.success = False
-                    action_output.output = f"Failed to retrieve {acl} from the Tool: {e}"
+                    action_output.output = "Failed to retrieve %s from the Tool: %s" % (acl, str(e))
                     session.close()
                     return
 

@@ -44,6 +44,7 @@ class CiscoLiveServiceCreate(Service):
                 self.setup_ntp(dc, switch)
                 self.setup_snmp(dc, switch)
                 self.setup_logging(dc, switch)
+                self.setup_span(dc, switch)
 
             # Configure DC FIs.
             for fi in dc.fabric_interconnect:
@@ -79,8 +80,8 @@ class CiscoLiveServiceCreate(Service):
                 vpc_peer_name = peer_sw.device
                 break
 
-        vpc_keep_intf = self.service.vpc_peer.keepalive_interface
-        vpc_peer_pc = self.service.vpc_peer.peer_port_channel
+        # vpc_keep_intf = self.service.vpc_peer.keepalive_interface
+        # vpc_peer_pc = self.service.vpc_peer.peer_port_channel
 
         base_vars = ncs.template.Variables()
         base_templ = ncs.template.Template(self.service)
@@ -103,10 +104,10 @@ class CiscoLiveServiceCreate(Service):
         base_vars.add("VPC_LOCAL_IP", vpc_self)
         base_vars.add("VPC_PEER_IP", vpc_peer)
         base_vars.add("VPC_PEER_SW", vpc_peer_name)
-        base_vars.add("VPC_PORT_CHANNEL", vpc_peer_pc)
-        base_vars.add("VPC_KEEP_INTF", vpc_keep_intf)
-        base_vars.add("YEAR", self.service.year)
-        base_vars.add("CONTACT", self.service.contact)
+        # base_vars.add("VPC_PORT_CHANNEL", vpc_peer_pc)
+        # base_vars.add("VPC_KEEP_INTF", vpc_keep_intf)
+        # base_vars.add("YEAR", self.service.year)
+        # base_vars.add("CONTACT", self.service.contact)
 
         self.log.info(f"Applying template switch-base-cfg with vars {dict(base_vars)}")
         base_templ.apply("switch-base-cfg", base_vars)
@@ -146,9 +147,9 @@ class CiscoLiveServiceCreate(Service):
         pim_templ = ncs.template.Template(self.service)
 
         pim_vars.add("DEVICE", switch.device)
-        pim_vars.add("RP_ADDRESS", self.service.pim.rp)
-        pim_vars.add("SSM_RANGE", self.service.pim.ssm_range)
-        pim_vars.add("PIM_SOURCE", self.service.management.interface.name)
+        # pim_vars.add("RP_ADDRESS", self.service.pim.rp)
+        # pim_vars.add("SSM_RANGE", self.service.pim.ssm_range)
+        # pim_vars.add("PIM_SOURCE", self.service.management.interface.name)
 
         self.log.info(f"Applying template pim-cfg with vars {dict(pim_vars)}")
         pim_templ.apply("pim-cfg", pim_vars)
@@ -167,13 +168,13 @@ class CiscoLiveServiceCreate(Service):
         netflow_templ = ncs.template.Template(self.service)
 
         netflow_vars.add("DEVICE", switch.device)
-        netflow_vars.add("EXPORTER", self.service.netflow.exporter)
-        netflow_vars.add("EXPORT_INTF", self.service.management.interface.name)
-        netflow_vars.add("EXPORTER_PORT", self.service.netflow.exporter_port)
-        netflow_vars.add("INTF_TIMEOUT", self.service.netflow.interface_timeout)
-        netflow_vars.add("TEMPLATE_TIMEOUT", self.service.netflow.template_timeout)
-        netflow_vars.add("V4_MONITOR", self.service.netflow.v4_monitor)
-        netflow_vars.add("V6_MONITOR", self.service.netflow.v6_monitor)
+        # netflow_vars.add("EXPORTER", self.service.netflow.exporter)
+        # netflow_vars.add("EXPORT_INTF", self.service.management.interface.name)
+        # netflow_vars.add("EXPORTER_PORT", self.service.netflow.exporter_port)
+        # netflow_vars.add("INTF_TIMEOUT", self.service.netflow.interface_timeout)
+        # netflow_vars.add("TEMPLATE_TIMEOUT", self.service.netflow.template_timeout)
+        # netflow_vars.add("V4_MONITOR", self.service.netflow.v4_monitor)
+        # netflow_vars.add("V6_MONITOR", self.service.netflow.v6_monitor)
 
         self.log.info(f"Applying template nx-netflow-base-cfg with vars {dict(netflow_vars)}")
         netflow_templ.apply("nx-netflow-base-cfg", netflow_vars)
@@ -190,7 +191,7 @@ class CiscoLiveServiceCreate(Service):
 
         hsrp_vars.add("DEVICE", switch.device)
         hsrp_vars.add("HSRP_KEY", decrypt(self.service.security.hsrp_key))
-        hsrp_vars.add("CHAIN_NAME", self.service.security.hsrp_key_chain)
+        # hsrp_vars.add("CHAIN_NAME", self.service.security.hsrp_key_chain)
 
         self.log.info("Applying template hsrp-key-cfg")
         hsrp_templ.apply("hsrp-key-cfg", hsrp_vars)
@@ -278,8 +279,8 @@ class CiscoLiveServiceCreate(Service):
             v4_vip = list(ipv4_prefix.hosts())[-1]
             svi_vars.add("HSRP_V4_VIP", v4_vip)
             svi_vars.add("HSRP_V4_VIP", v4_vip)
-            svi_vars.add("HSRP_KEY_CHAIN", self.service.security.hsrp_key_chain)
-            svi_vars.add("OSPF_KEY_CHAIN", self.service.security.ospf_key_chain)
+            # svi_vars.add("HSRP_KEY_CHAIN", self.service.security.hsrp_key_chain)
+            # svi_vars.add("OSPF_KEY_CHAIN", self.service.security.ospf_key_chain)
             # Essentially we start at the second to last host address and subtract so that DC 1 switch 1 gets the smallest host address.
             v4_addr = list(ipv4_prefix.hosts())[-2 - ((6 - get_switch_index(dc.id, switch.id)))]
             svi_vars.add(
@@ -400,7 +401,7 @@ class CiscoLiveServiceCreate(Service):
         dns_vars.add("DEVICE", switch.device)
         dns_vars.add("VLAN_ID", vlan.id)
 
-        dns_vars.add("DOMAIN", self.service.dns.domain)
+        # dns_vars.add("DOMAIN", self.service.dns.domain)
 
         self.log.info(f"Applying template svi-nd-dns-search-cfg with vars {dict(dns_vars)}")
         dns_templ.apply("svi-nd-dns-search-cfg", dns_vars)
@@ -448,9 +449,19 @@ class CiscoLiveServiceCreate(Service):
             elif "ciscolive:description-list" in intf and intf.description_list:
                 # Unique descriptions for this interface for each switch.
                 if len(list(intf.description_list)) == 2:
-                    pc_vars.add("DESCRIPTION", list(intf.description_list)[int(dc.id) - 1])
+                    pc_vars.add(
+                        "DESCRIPTION",
+                        list(intf.description_list)[int(dc.id) - 1].format(
+                            dc=dc.id, switch=switch.id, peer_dc=get_peer_id(dc.id), peer_switch=get_peer_id(switch.id)
+                        ),
+                    )
                 else:
-                    pc_vars.add("DESCRIPTION", list(intf.description_list)[get_switch_index(dc.id, switch.id)])
+                    pc_vars.add(
+                        "DESCRIPTION",
+                        list(intf.description_list)[get_switch_index(dc.id, switch.id)].format(
+                            dc=dc.id, switch=switch.id, peer_dc=get_peer_id(dc.id), peer_switch=get_peer_id(switch.id)
+                        ),
+                    )
             else:
                 pc_vars.add("DESCRIPTION", "")
 
@@ -585,9 +596,19 @@ class CiscoLiveServiceCreate(Service):
         elif "ciscolive:description-list" in intf and intf.description_list:
             # The member on each switch gets its own interface.
             if len(list(intf.description_list)) == 2:
-                member_vars.add("DESCRIPTION", list(intf.description_list)[int(switch.id) - 1])
+                member_vars.add(
+                    "DESCRIPTION",
+                    list(intf.description_list)[int(switch.id) - 1].format(
+                        dc=dc.id, switch=switch.id, peer_dc=get_peer_id(dc.id), peer_switch=get_peer_id(switch.id)
+                    ),
+                )
             else:
-                member_vars.add("DESCRIPTION", list(intf.description_list)[get_switch_index(dc.id, switch.id)])
+                member_vars.add(
+                    "DESCRIPTION",
+                    list(intf.description_list)[get_switch_index(dc.id, switch.id)].format(
+                        dc=dc.id, switch=switch.id, peer_dc=get_peer_id(dc.id), peer_switch=get_peer_id(switch.id)
+                    ),
+                )
         else:
             member_vars.add("DESCRIPTION", "")
 
@@ -626,9 +647,19 @@ class CiscoLiveServiceCreate(Service):
             elif "ciscolive:description-list" in intf and intf.description_list:
                 # This port gets a unique description on each switch.
                 if len(list(intf.description_list)) == 2:
-                    ethernet_vars.add("DESCRIPTION", list(intf.description_list)[int(dc.id) - 1])
+                    ethernet_vars.add(
+                        "DESCRIPTION",
+                        list(intf.description_list)[int(dc.id) - 1].format(
+                            dc=dc.id, switch=switch.id, peer_dc=get_peer_id(dc.id), peer_switch=get_peer_id(switch.id)
+                        ),
+                    )
                 else:
-                    ethernet_vars.add("DESCRIPTION", list(intf.description_list)[sindex])
+                    ethernet_vars.add(
+                        "DESCRIPTION",
+                        list(intf.description_list)[sindex].format(
+                            dc=dc.id, switch=switch.id, peer_dc=get_peer_id(dc.id), peer_switch=get_peer_id(switch.id)
+                        ),
+                    )
             else:
                 ethernet_vars.add("DESCRIPTION", "")
 
@@ -646,7 +677,7 @@ class CiscoLiveServiceCreate(Service):
                 ethernet_vars.add("USE_PIM", "False")
                 ethernet_vars.add("MTU", "")
                 ethernet_vars.add("OSPF_KEY_CHAIN", "")
-            else:
+            elif intf.mode != "monitor":
                 # This is an edge interface.
                 ethernet_vars.add("VLAN", "")
                 ethernet_vars.add("MTU", intf.mtu)
@@ -661,6 +692,14 @@ class CiscoLiveServiceCreate(Service):
                     ethernet_vars.add("V6_ADDRESS", list(intf.ipv6.address)[sindex])
                 else:
                     ethernet_vars.add("V6_ADDRESS", "")
+            else:
+                # This is a monitor interface.
+                ethernet_vars.add("V4_ADDRESS", "")
+                ethernet_vars.add("V6_ADDRESS", "")
+                ethernet_vars.add("USE_PIM", "False")
+                ethernet_vars.add("MTU", "")
+                ethernet_vars.add("OSPF_KEY_CHAIN", "")
+                ethernet_vars.add("VLAN", "")
 
             if self.service.pim.rp and self.service.pim.rp != "":
                 ethernet_vars.add("USE_PIM", "True")
@@ -701,9 +740,9 @@ class CiscoLiveServiceCreate(Service):
         aaa_templ = ncs.template.Template(self.service)
 
         aaa_vars.add("DEVICE", switch.device)
-        aaa_vars.add("MGMT_INTF", self.service.management.interface.name)
-        aaa_vars.add("AAA_GROUP", self.service.security.aaa.group)
-        aaa_vars.add("DEADTIME", self.service.security.aaa.deadtime)
+        # aaa_vars.add("MGMT_INTF", self.service.management.interface.name)
+        # aaa_vars.add("AAA_GROUP", self.service.security.aaa.group)
+        # aaa_vars.add("DEADTIME", self.service.security.aaa.deadtime)
 
         self.log.info(f"Applying template aaa-base-cfg with vars {dict(aaa_vars)}")
         aaa_templ.apply("aaa-base-cfg", aaa_vars)
@@ -724,8 +763,8 @@ class CiscoLiveServiceCreate(Service):
         server_vars.add("DEVICE", switch.device)
         server_vars.add("SERVER", server)
         server_vars.add("KEY", decrypt(self.service.security.aaa.tacplus_key))
-        server_vars.add("AAA_GROUP", self.service.security.aaa.group)
-        server_vars.add("TIMEOUT", self.service.security.aaa.timeout)
+        # server_vars.add("AAA_GROUP", self.service.security.aaa.group)
+        # server_vars.add("TIMEOUT", self.service.security.aaa.timeout)
 
         self.log.info(f"Applying aaa-server-cfg with vars {dict(server_vars)}")
         server_templ.apply("aaa-server-cfg", server_vars)
@@ -810,13 +849,13 @@ class CiscoLiveServiceCreate(Service):
             raise ValueError(f"Platform {platform} is not supported.")
 
         snmp_vars.add("DEVICE", device.device)
-        snmp_vars.add("CONTACT", self.service.contact)
+        # snmp_vars.add("CONTACT", self.service.contact)
         snmp_vars.add("LOCATION", dc.location)
-        snmp_vars.add("USER", self.service.snmp.user)
+        # snmp_vars.add("USER", self.service.snmp.user)
         snmp_vars.add("PASSWORD", decrypt(self.service.snmp.password))
-        snmp_vars.add("MGMT_INTF", self.service.management.interface.name)
-        snmp_vars.add("MGMT_ACL", self.service.security.v4_mgmt_acl)
-        snmp_vars.add("MGMTv6_ACL", self.service.security.v6_mgmt_acl)
+        # snmp_vars.add("MGMT_INTF", self.service.management.interface.name)
+        # snmp_vars.add("MGMT_ACL", self.service.security.v4_mgmt_acl)
+        # snmp_vars.add("MGMTv6_ACL", self.service.security.v6_mgmt_acl)
 
         if self.service.snmp.community and self.service.snmp.community != "":
             snmp_vars.add("COMMUNITY", decrypt(self.service.snmp.community))
@@ -893,6 +932,22 @@ class CiscoLiveServiceCreate(Service):
         self.log.info(f"Applying template {templ_name} with vars {dict(server_vars)}")
         server_templ.apply(templ_name, server_vars)
 
+    def setup_span(self, dc, switch):
+        """
+        Configure SPAN parameters on a switch.
+        """
+
+        self.log.info(f"Calling setup_span for DC {dc.id} with switch ID {switch.id}, name {switch.device}")
+
+        # Use pure template logic to deploy SPAN.
+        monitor_vars = ncs.template.Variables()
+        monitor_templ = ncs.template.Template(self.service)
+
+        monitor_vars.add("DEVICE", switch.device)
+
+        self.log.info(f"Applying template nx-span-base-cfg with vars {dict(monitor_vars)}")
+        monitor_templ.apply("nx-span-base-cfg", monitor_vars)
+
     def setup_ospf(self, dc, switch):
         """
         Configure OSPF parameters on a switch.
@@ -910,12 +965,12 @@ class CiscoLiveServiceCreate(Service):
             ospf_vars.add("BANDWIDTH", int(self.service.bandwidth / (1000 * 1000)))
 
         ospf_vars.add("KEY", decrypt(self.service.security.ospf_key))
-        ospf_vars.add("KEY_CHAIN", self.service.security.ospf_key_chain)
-        ospf_vars.add("STATIC_ACL_V4", self.service.routing.ospf.static_acl_v4)
-        ospf_vars.add("STATIC_RM_V4", self.service.routing.ospf.static_rm_v4)
-        ospf_vars.add("STATIC_ACL_V6", self.service.routing.ospf.static_acl_v6)
-        ospf_vars.add("STATIC_RM_V6", self.service.routing.ospf.static_rm_v6)
-        if "ciscolive:local_as" not in self.service.routing.bgp or not self.service.routing.bgp.local_as:
+        # ospf_vars.add("KEY_CHAIN", self.service.security.ospf_key_chain)
+        # ospf_vars.add("STATIC_ACL_V4", self.service.routing.ospf.static_acl_v4)
+        # ospf_vars.add("STATIC_RM_V4", self.service.routing.ospf.static_rm_v4)
+        # ospf_vars.add("STATIC_ACL_V6", self.service.routing.ospf.static_acl_v6)
+        # ospf_vars.add("STATIC_RM_V6", self.service.routing.ospf.static_rm_v6)
+        if "ciscolive:local-as" in self.service.routing.bgp and self.service.routing.bgp.local_as:
             ospf_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
             ospf_vars.add("BGP_RM", self.service.routing.bgp.route_map)
         else:
@@ -942,7 +997,7 @@ class CiscoLiveServiceCreate(Service):
         bgp_templ = ncs.template.Template(self.service)
 
         bgp_vars.add("DEVICE", switch.device)
-        bgp_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
+        # bgp_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
 
         v4_subnet = ipaddress.ip_network(self.service.management.interface.v4_subnet)
         v4_addr = list(v4_subnet.hosts())[0]
@@ -955,8 +1010,14 @@ class CiscoLiveServiceCreate(Service):
 
         seq = 10
         for neighbor in self.service.routing.bgp.neighbor:
-            self.setup_bgp_peer(dc, switch, neighbor, seq)
-            seq += 10
+            if "ciscolive:data-center" in neighbor:
+                peers = list(neighbor.data_center)
+            else:
+                peers = ["1", "2"]
+
+            if str(dc.id) in peers:
+                self.setup_bgp_peer(dc, switch, neighbor, seq)
+                seq += 10
 
     def setup_bgp_peer(self, dc, switch, neighbor, seq):
         """
@@ -971,10 +1032,10 @@ class CiscoLiveServiceCreate(Service):
         bgp_peer_templ = ncs.template.Template(self.service)
 
         bgp_peer_vars.add("DEVICE", switch.device)
-        bgp_peer_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
+        # bgp_peer_vars.add("LOCAL_AS", self.service.routing.bgp.local_as)
         bgp_peer_vars.add("ADDRESS", neighbor.address)
         bgp_peer_vars.add("REMOTE_AS", neighbor.remote_as)
-        bgp_peer_vars.add("BGP_RM", self.service.routing.bgp.route_map)
+        # bgp_peer_vars.add("BGP_RM", self.service.routing.bgp.route_map)
         bgp_peer_vars.add("SEQ", seq)
 
         self.log.info(f"Applying template bgp-peer-cfg with vars {dict(bgp_peer_vars)}")
@@ -1002,7 +1063,7 @@ class CiscoLiveServiceCreate(Service):
 
         if templ_name:
             dns_vars.add("DEVICE", device.device)
-            dns_vars.add("DOMAIN", self.service.dns.domain)
+            # dns_vars.add("DOMAIN", self.service.dns.domain)
 
             self.log.info(f"Applying template {templ_name} with vars {dict(dns_vars)}")
             dns_templ.apply(templ_name, dns_vars)
@@ -1130,8 +1191,8 @@ class CiscoLiveServiceCreate(Service):
         acl_templ = ncs.template.Template(self.service)
 
         acl_vars.add("DEVICE", switch.device)
-        acl_vars.add("V4_MGMT_ACL", self.service.security.v4_mgmt_acl)
-        acl_vars.add("V6_MGMT_ACL", self.service.security.v6_mgmt_acl)
+        # acl_vars.add("V4_MGMT_ACL", self.service.security.v4_mgmt_acl)
+        # acl_vars.add("V6_MGMT_ACL", self.service.security.v6_mgmt_acl)
 
         for idx, network in enumerate(self.service.management.v4_network):
             seq = (idx + 1) * 10
@@ -1158,8 +1219,8 @@ class CiscoLiveServiceCreate(Service):
         route_templ = ncs.template.Template(self.service)
 
         route_vars.add("DEVICE", switch.device)
-        route_vars.add("OSPF_STATIC_ACL_V4", self.service.routing.ospf.static_acl_v4)
-        route_vars.add("OSPF_STATIC_ACL_V6", self.service.routing.ospf.static_acl_v6)
+        # route_vars.add("OSPF_STATIC_ACL_V4", self.service.routing.ospf.static_acl_v4)
+        # route_vars.add("OSPF_STATIC_ACL_V6", self.service.routing.ospf.static_acl_v6)
 
         i = 1
         for route in self.service.routing.ip:

@@ -42,6 +42,13 @@
                             </port>
                         </spanning-tree>
                         <?end?>
+                        <?if {$MODE = "access"}?>
+                        <spanning-tree>
+                            <port>
+                                <type>edge</type>
+                            </port>
+                        </spanning-tree>
+                        <?end?>
                         <?end?>
                     </Ethernet>
                 </interface>

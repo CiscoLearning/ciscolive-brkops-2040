@@ -7,6 +7,7 @@
                     <Vlan>
                         <name>{$VLAN_ID}</name>
                         <description>{$DESCRIPTION}</description>
+                        <shutdown tags="delete"/>
                         <ip>
                             <?if {$DO_NETFLOW = "True"}?>
                             <flow>
@@ -38,14 +39,14 @@
                                 <?if {$CATEGORY = "peer"}?>
                                 <authentication>
                                     <authentication-type>message-digest</authentication-type>
-                                    <key-chain>{$OSPF_KEY_CHAIN}</key-chain>
+                                    <key-chain>{/security/ospf-key-chain}</key-chain>
                                 </authentication>
                                 <passive-interface>false</passive-interface>
                                 <network>point-to-point</network>
                                 <?elif {$DO_OSPF = "True"}?>
                                 <authentication>
                                     <authentication-type>message-digest</authentication-type>
-                                    <key-chain>{$OSPF_KEY_CHAIN}</key-chain>
+                                    <key-chain>{/security/ospf-key-chain}</key-chain>
                                 </authentication>
                                 <passive-interface>false</passive-interface>
                                 <network>{$OSPF_NETWORK}</network>
@@ -132,7 +133,7 @@
                                 <addr_type>ipv4</addr_type>
                                 <authentication>
                                     <md5>
-                                        <key-chain>{$HSRP_KEY_CHAIN}</key-chain>
+                                        <key-chain>{/security/hsrp-key-chain}</key-chain>
                                     </md5>
                                 </authentication>
                                 <ip>
@@ -151,7 +152,7 @@
                                 <addr_type>ipv6</addr_type>
                                 <authentication>
                                     <md5>
-                                        <key-chain>{$HSRP_KEY_CHAIN}</key-chain>
+                                        <key-chain>{/security/hsrp-key-chain}</key-chain>
                                     </md5>
                                 </authentication>
                                 <ip>

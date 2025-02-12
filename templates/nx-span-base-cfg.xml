@@ -1,0 +1,34 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device>
+            <name>{$DEVICE}</name>
+            <config>
+                <monitor xmlns="http://tail-f.com/ned/cisco-nx">
+                    <session>
+                        <id>{/monitor/id}</id>
+                        <source>
+                            <?foreach {/vlan}?>
+                            <?if {category = "vm"}?>
+                            <vlan>
+                                <id>{id}</id>
+                                <direction>{/monitor/direction}</direction>
+                            </vlan>
+                            <?end?>
+                            <?end?>
+                        </source>
+                        <destination>
+                            <?foreach {/interface/Ethernet}?>
+                            <?if {mode = "monitor"}?>
+                            <interface>
+                                <name>Ethernet{name}</name>
+                            </interface>
+                            <?end?>
+                            <?end?>
+                        </destination>
+                        <shut>{/monitor/shutdown}</shut>
+                    </session>
+                </monitor>
+            </config>
+        </device>
+    </devices>
+</config-template>

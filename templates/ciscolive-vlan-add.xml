@@ -1,6 +1,6 @@
 <ciscolive xmlns="http://ciscolive.network/ciscolive">
-    <location>{$LOCATION}</location>
-    <year>{$YEAR}</year>
+    <location>{/location}</location>
+    <year>{/year}</year>
     <vlan>
         <id>{$VLAN_ID}</id>
         <name>{$VLAN_NAME}</name>

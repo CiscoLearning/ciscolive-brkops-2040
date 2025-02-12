@@ -27,6 +27,15 @@
                         <?if {$SPEED != ""}?>
                         <speed>{$SPEED}</speed>
                         <?end?>
+                        <?elif {$MODE = "monitor"}?>
+                        <!-- This is a SPAN destination. -->
+                        <shutdown tags="delete"/>
+                        <enable>
+                            <switchport>true</switchport>
+                        </enable>
+                        <switchport>
+                            <monitor/>
+                        </switchport>
                         <?else?>
                         <!-- This is an edge interface. -->
                         <shutdown tags="delete"/>

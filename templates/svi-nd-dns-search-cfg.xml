@@ -11,7 +11,7 @@
                                 <ra>
                                     <dns>
                                         <search-list>
-                                            <name>{$DOMAIN}</name>
+                                            <name>{/dns/domain}</name>
                                             <life-time>86400</life-time>
                                             <sequence>0</sequence>
                                         </search-list>
